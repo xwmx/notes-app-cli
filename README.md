@@ -1,4 +1,4 @@
-# `notes-app` - Notes.app CLI
+# `notes-app` • Notes.app CLI
 
 A command line interface for Notes.app on macOS.
 
