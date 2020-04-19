@@ -1315,6 +1315,7 @@ Description:
 HEREDOC
 _folders() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _folder_name=
   local _properties=
 
   while ((${#}))
@@ -1375,21 +1376,59 @@ _folders() {
   local _script_header=
   local -a _script_properties=()
 
-  read -r -d '' _script_header <<HEREDOC || true
+  if [[ -z "${_folder_name}" ]]
+  then
+    read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   set myAccount to first account whose name = "${_account_name}"
-  set myFolders to folders of myAccount
-  set myCounter to 0
+  tell myAccount
+    set myFolders to folders of myAccount
+    set myCounter to 0
 
-  repeat with theFolder in myFolders
-    tell theFolder
-      set myCounter to myCounter + 1
-      set folderContainer to get container
-      set folderId to get id
-      set folderName to get name
+    repeat with theFolder in myFolders
+      tell theFolder
+        set myCounter to myCounter + 1
+        set folderContainer to get container
+        set folderId to get id
+        set folderName to get name
 
-      -- log myCounter
+        -- log myCounter
 HEREDOC
+
+    read -r -d '' _script_footer <<HEREDOC || true
+      end tell
+    end repeat
+  end tell
+end tell
+HEREDOC
+  else
+    read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  set myAccount to first account whose name = "${_account_name}"
+  tell myAccount
+    set myFolder to first folder whose name = "${_folder_name}"
+    tell myFolder
+      set myFolders to folders of myFolder
+      set myCounter to 0
+
+      repeat with theFolder in myFolders
+        tell theFolder
+          set myCounter to myCounter + 1
+          set folderContainer to get container
+          set folderId to get id
+          set folderName to get name
+
+          -- log myCounter
+HEREDOC
+
+    read -r -d '' _script_footer <<HEREDOC || true
+        end tell
+      end repeat
+    end tell
+  end tell
+end tell
+HEREDOC
+  fi
 
   if [[ "${_properties}" =~ container|^all$ ]]
   then
@@ -1410,12 +1449,6 @@ HEREDOC
   then # no properties were specified
     _script_properties+=("log folderName")
   fi
-
-  read -r -d '' _script_footer <<HEREDOC || true
-    end tell
-  end repeat
-end tell
-HEREDOC
 
 local _script="\
 ${_script_header}
