@@ -17,11 +17,11 @@ Usage:
   notes-app add --body <body> --name <name> [--account <account>]
             [--folder <folder>]
   notes-app commands
-  notes-app count [<folder>]
+  notes-app count [--account <account>] [--folder <folder>]
   notes-app delete <id> [--account <account>] [--folder <folder>]
   notes-app folders
   notes-app folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
-  notes-app list [--folder <folder>]
+  notes-app list [--account <account>] [--folder <folder>]
   notes-app show <id> [--account <account>] [--folder <folder>]
              [--properties <prop1>,<prop2>]
   notes-app update <id> (--body <body> | --name <name>) [--account <account>]
@@ -67,7 +67,7 @@ Description:
 
 ```text
 Usage:
-  notes-app count [<folder>]
+  notes-app count [--account <account>] [--folder <folder>]
 
 Description:
   Print the number of notes in <folder>.
@@ -92,10 +92,19 @@ Description:
 ```text
 Usage:
   notes-app folders
-  notes-app show <id> [--account <account>] [--properties <prop1>,<prop2>]
+  notes-app folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
 
 Options:
   --account <name>  The accout containing the folder.
+  --properties <prop1>,<prop2>  A comma-separated list of property names to
+                                include in the output. Set to 'all' to include
+                                all properties.
+
+Available Properties:
+  all
+  id
+  container
+  name
 
 Description:
   List folders in an account.
@@ -127,13 +136,13 @@ Options:
 
 Available Properties:
   all
-  noteId
-  noteContainer
-  notePasswordProtected
-  noteCreationDate
-  noteModificationDate
-  noteName
-  noteBody
+  id
+  container
+  passwordProtected
+  creationDate
+  modificationDate
+  name
+  body
 
 Description:
   Show a note.

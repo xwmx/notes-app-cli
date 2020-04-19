@@ -651,11 +651,11 @@ Usage:
   ${_ME} add --body <body> --name <name> [--account <account>]
             [--folder <folder>]
   ${_ME} commands
-  ${_ME} count [<folder>]
+  ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <id> [--account <account>] [--folder <folder>]
   ${_ME} folders
   ${_ME} folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
-  ${_ME} list [--folder <folder>]
+  ${_ME} list [--account <account>] [--folder <folder>]
   ${_ME} show <id> [--account <account>] [--folder <folder>]
              [--properties <prop1>,<prop2>]
   ${_ME} update <id> (--body <body> | --name <name>) [--account <account>]
@@ -1059,22 +1059,55 @@ HEREDOC
 
 desc "count" <<HEREDOC
 Usage:
-  ${_ME} count [<folder>]
+  ${_ME} count [--account <account>] [--folder <folder>]
 
 Description:
   Print the number of notes in <folder>.
 HEREDOC
 _count() {
-  local _folder_name="${1:-}"
-  if [[ -z "${_folder_name:-}" ]]
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "count"
+          return 1
+        fi
+        ;;
+      --folder)
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "count"
+          return 1
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
   then
-    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+    return 1
   fi
 
   local _script=
   read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
-  tell account "iCloud"
+  tell account "${_account_name}"
     set myFolder to first folder whose name = "${_folder_name}"
     get the count of notes of myFolder
   end tell
@@ -1210,6 +1243,15 @@ Usage:
 
 Options:
   --account <name>  The accout containing the folder.
+  --properties <prop1>,<prop2>  A comma-separated list of property names to
+                                include in the output. Set to 'all' to include
+                                all properties.
+
+Available Properties:
+  all
+  id
+  container
+  name
 
 Description:
   List folders in an account.
@@ -1262,9 +1304,11 @@ _folders() {
     return 1
   fi
 
-  local _script=
+  local _script_footer=
+  local _script_header=
+  local -a _script_properties=()
 
-  read -r -d '' _script <<HEREDOC || true
+  read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   set myAccount to first account whose name = "${_account_name}"
   set myFolders to folders of myAccount
@@ -1277,14 +1321,36 @@ tell application "Notes"
       set folderId to get id
       set folderName to get name
 
-      log myCounter
-      log folderContainer
-      log folderId
-      log folderName
+      -- log myCounter
+HEREDOC
+
+  if [[ "${_properties}" =~ container|^all$ ]]
+  then
+    _script_properties+=("log folderContainer")
+  fi
+
+  if [[ "${_properties}" =~ id|^all$ ]]
+  then
+    _script_properties+=("log folderId")
+  fi
+
+  if [[ "${_properties}" =~ name|^all$ ]]
+  then
+    _script_properties+=("log folderName")
+  fi
+
+  read -r -d '' _script_footer <<HEREDOC || true
     end tell
   end repeat
 end tell
 HEREDOC
+
+local _script="\
+${_script_header}
+${_script_properties[*]:-}
+${_script_footer}"
+
+  _debug printf "\${_script}: %s\\n" "${_script}"
 
   osascript -e "${_script}"
 }
@@ -1293,7 +1359,11 @@ HEREDOC
 
 desc "list" <<HEREDOC
 Usage:
-  ${_ME} list [--folder <folder>]
+  ${_ME} list [--account <account>] [--folder <folder>]
+
+Options:
+  --account <account>  The account containing the note.
+  --folder  <folder>   The folder containing the note.
 
 Description:
   List notes.
@@ -1365,13 +1435,13 @@ Options:
 
 Available Properties:
   all
-  noteId
-  noteContainer
-  notePasswordProtected
-  noteCreationDate
-  noteModificationDate
-  noteName
-  noteBody
+  id
+  container
+  passwordProtected
+  creationDate
+  modificationDate
+  name
+  body
 
 Description:
   Show a note.
@@ -1441,52 +1511,51 @@ _show() {
 
   local _script_footer=
   local _script_header=
-  local _script_name=
   local -a _script_properties=()
 
   read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  tell account "iCloud"
+  tell account "${_account_name}"
     tell folder "${_folder_name}"
       tell note ${_id}
 HEREDOC
-  if [[ "${_properties}" =~ noteId|^all$ ]]
+  if [[ "${_properties}" =~ id|^all$ ]]
   then
     _script_properties+=("set noteId to get id")
     _script_properties+=("log noteId")
   fi
 
-  if [[ "${_properties}" =~ noteContainer|^all$ ]]
+  if [[ "${_properties}" =~ container|^all$ ]]
   then
     _script_properties+=("set noteContainer to get container")
     _script_properties+=("log noteContainer")
   fi
 
-  if [[ "${_properties}" =~ notePasswordProtected|^all$ ]]
+  if [[ "${_properties}" =~ passwordProtected|^all$ ]]
   then
     _script_properties+=("set notePasswordProtected to get password protected")
     _script_properties+=("log notePasswordProtected")
   fi
 
-  if [[ "${_properties}" =~ noteCreationDate|^all$ ]]
+  if [[ "${_properties}" =~ creationDate|^all$ ]]
   then
     _script_properties+=("set noteCreationDate to get creation date")
     _script_properties+=("log noteCreationDate")
   fi
 
-  if [[ "${_properties}" =~ noteModificationDate|^all$ ]]
+  if [[ "${_properties}" =~ modificationDate|^all$ ]]
   then
     _script_properties+=("set noteModificationDate to get modification date")
     _script_properties+=("log noteModificationDate")
   fi
 
-  if [[ "${_properties}" =~ noteName|^all$ ]]
+  if [[ "${_properties}" =~ name|^all$ ]]
   then
     _script_properties+=("set noteName to get name")
     _script_properties+=("log noteName")
   fi
 
-  if [[ "${_properties}" =~ noteBody|^all$ ]]
+  if [[ "${_properties}" =~ body|^all$ ]]
   then
     _script_properties+=("set noteBody to get body")
     _script_properties+=("log noteBody")
