@@ -7,7 +7,7 @@ list, update, and delete notes.
 
 ## Quirks
 
-- Requires macOS
+- Requires macOS.
 - Notes.app must be open. `notes-app` will open it in background if it's
     not already open.
 - The formatting of the first line in a note is not preserved. Notes.app treats
