@@ -1518,52 +1518,52 @@ tell application "Notes"
   tell account "${_account_name}"
     tell folder "${_folder_name}"
       tell note ${_id}
+        set noteId to get id"
+        set noteContainer to get container
+        set notePasswordProtected to get password protected
+        set noteCreationDate to get creation date
+        set noteModificationDate to get modification date
+        set noteName to get name
+        set noteBody to get body
+        set noteId to get id
 HEREDOC
   if [[ "${_properties}" =~ id|^all$ ]]
   then
-    _script_properties+=("set noteId to get id")
     _script_properties+=("log noteId")
   fi
 
   if [[ "${_properties}" =~ container|^all$ ]]
   then
-    _script_properties+=("set noteContainer to get container")
     _script_properties+=("log noteContainer")
   fi
 
   if [[ "${_properties}" =~ passwordProtected|^all$ ]]
   then
-    _script_properties+=("set notePasswordProtected to get password protected")
     _script_properties+=("log notePasswordProtected")
   fi
 
   if [[ "${_properties}" =~ creationDate|^all$ ]]
   then
-    _script_properties+=("set noteCreationDate to get creation date")
     _script_properties+=("log noteCreationDate")
   fi
 
   if [[ "${_properties}" =~ modificationDate|^all$ ]]
   then
-    _script_properties+=("set noteModificationDate to get modification date")
     _script_properties+=("log noteModificationDate")
   fi
 
   if [[ "${_properties}" =~ name|^all$ ]]
   then
-    _script_properties+=("set noteName to get name")
     _script_properties+=("log noteName")
   fi
 
   if [[ "${_properties}" =~ body|^all$ ]]
   then
-    _script_properties+=("set noteBody to get body")
     _script_properties+=("log noteBody")
   fi
 
   if [[ -z "${_script_properties[*]:-}" ]]
   then
-    _script_properties+=("set noteId to get id")
     _script_properties+=("log noteId")
   fi
 
