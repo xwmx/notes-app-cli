@@ -10,5 +10,6 @@
     "test": "bats test"
   },
   "author": "William Melody",
-  "license": "GPL-2.0-only"
+  "license": "GPL-2.0-only",
+  "dependencies": {}
 }
