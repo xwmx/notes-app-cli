@@ -471,7 +471,7 @@ _get_id_type() {
   elif [[ "${_id}" =~ x\-coredata\:\/\/ ]]
   then
     _type="id"
-  elif [[ ! "${_id}" =~ ^[[:digit:]]+$ ]]
+  elif [[ "${_id}" =~ ^[[:digit:]]+$ ]]
   then
     _type="number"
   else
@@ -1393,7 +1393,7 @@ _folders() {
           _folder_name="${_val}"
           shift
         else
-          _help "add"
+          _help "folders"
           return 1
         fi
         ;;
@@ -1425,12 +1425,16 @@ _folders() {
     _help "folders"
     return 1
   else
-    _account_name="$(_get_id_normalized "${_account_name}")"
-  fi
-
-  if [[ -n "${_folder_name:-}" ]]
-  then
-    _folder_name="$(_get_id_normalized "${_folder_name}")"
+    local _account_query=
+    if [[ "$(_get_id_type "${_account_name}")" == "id" ]]
+    then
+      _account_query="set myAccount to first account whose id = ${_account_name}"
+    elif [[ "$(_get_id_type "${_account_name}")" == "number" ]]
+    then
+      _account_query="set myAccount to account ${_account_name}"
+    else
+      _account_query="set myAccount to first account whose name = \"${_account_name}\""
+    fi
   fi
 
   _debug printf "\${_folder_name}: %s\\n" "${_folder_name:-}"
@@ -1443,7 +1447,7 @@ _folders() {
   then
     read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  set myAccount to first account whose name = ${_account_name}
+  ${_account_query}
   tell myAccount
     set myFolders to folders of myAccount
     set myCounter to 0
@@ -1471,14 +1475,14 @@ HEREDOC
       _folder_query="set myFolder to first folder whose id = ${_folder_name}"
     elif [[ "$(_get_id_type "${_folder_name}")" == "number" ]]
     then
-      _folder_query="set myFolder to first folder ${_folder_name}"
+      _folder_query="set myFolder to folder ${_folder_name}"
     else
       _folder_query="set myFolder to first folder whose name = \"${_folder_name}\""
     fi
 
     read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  set myAccount to first account whose name = ${_account_name}
+  ${_account_query}
   tell myAccount
     ${_folder_query}
     tell myFolder
@@ -1811,6 +1815,14 @@ _show() {
     return 1
   fi
 
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _help "show"
+    return 1
+  else
+    _folder_name="$(_get_id_selector "${_folder_name}")"
+  fi
+
   if [[ -z "${_id:-}" ]]
   then
     _help "show"
@@ -1843,7 +1855,7 @@ HEREDOC
     read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   tell account "${_account_name}"
-    tell folder "${_folder_name}"
+    tell folder ${_folder_name}
       tell note ${_id}
         set noteId to get id
         set noteContainer to get container
