@@ -636,7 +636,11 @@ _validate_account_contains_folder() {
   fi
 
   local _account_folders
-  _account_folders="$(_folders --account "${_account_name}")"
+  _account_folders="$(
+    _folders \
+      --account "${_account_name}" \
+      --properties name
+  )"
 
   _contains "${_folder_name}" "${_account_folders[@]}"
 }
@@ -976,8 +980,9 @@ _count() {
     shift
   done
 
-  if [[ -n "${_folder_name:-}" ]] &&
-    ! _validate_account_contains_folder "${_account_name}" "${_folder_name}"
+  if [[ -n "${_account_name:-}" ]] &&
+     [[ -n "${_folder_name:-}"  ]] &&
+     ! _validate_account_contains_folder "${_account_name}" "${_folder_name}"
   then
     printf "Account '%s' does not contain folder '%s'.\\n" \
       "${_account_name}" "${_folder_name}"
