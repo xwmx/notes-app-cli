@@ -666,6 +666,7 @@ _add() {
   local _body=
   local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
   local _name=
+  local _properties=
   local _script=
 
   while ((${#}))
@@ -694,23 +695,31 @@ _add() {
     shift
   done
 
-  if [[ -z "${_body:-}" ]] || [[ -z "${_name:-}" ]]
-  then
-    return 1
-  fi
-
   if [[ -z "${_folder_name:-}" ]]
   then
     return 1
   fi
 
+  if [[ -n "${_body:-}" ]] && [[ -n "${_name:-}" ]]
+  then
+    _properties="{name:\"${_name}\", body:\"${_body}\"}"
+  elif [[ -n "${_body:-}" ]]
+  then
+    _properties="{body:\"${_body}\"}"
+  elif [[ -n "${_name:-}" ]]
+  then
+    _properties="{name:\"${_name}\"}"
+  fi
+
   read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
     tell account "iCloud"
-        make new note at folder "${_folder_name}" with properties {name:"${_name}", body:"${_body}"}
+        make new note at folder "${_folder_name}" with properties ${_properties}
     end tell
 end tell
 HEREDOC
+
+  _debug printf "\${_script}: %s\\n" "${_script:-}"
 
   osascript -e "${_script}"
 }
@@ -1513,10 +1522,12 @@ _ARGUMENTS=()
 # All available subcommands.
 _SUBCOMMANDS=(
   add
+  commands
   completions
   count
   delete
   env
+  help
   list
   show
   update
