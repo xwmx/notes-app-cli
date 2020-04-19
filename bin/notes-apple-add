@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+###############################################################################
+# notes-apple-add
+#
+# Usage:
+#   notes-apple-add --body <body> --name <name> [--folder <name>]
+###############################################################################
+
+_main() {
+  local _body=
+  local _folder_name=
+  local _name=
+  local _script=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --body)
+        _body="${_val:-}"
+        shift
+        ;;
+      --folder)
+        _folder_name="${_val:-}"
+        shift
+        ;;
+      --name)
+        _name="${_val:-}"
+        shift
+        ;;
+      *)
+        :
+        ;;
+    esac
+
+    shift
+  done
+
+  if [[ -z "${_body:-}" ]] || [[ -z "${_name:-}" ]]
+  then
+    return 1
+  fi
+
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _folder_name="notes.sh"
+  fi
+
+
+  read -r -d '' _script <<HEREDOC
+tell application "Notes"
+    tell account "iCloud"
+        make new note at folder "${_folder_name}" with properties {name:"${_name}", body:"${_body}"}
+    end tell
+end tell
+HEREDOC
+
+  osascript -e "${_script}"
+} && _main "${@:-}"

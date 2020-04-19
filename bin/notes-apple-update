@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+###############################################################################
+# notes-apple-update
+#
+# Usage:
+#   notes-apple-update <id> [--folder <name>] (--body <body> | --name <name>)
+###############################################################################
+
+_main() {
+  local _body=
+  local _folder_name=
+  local _id=
+  local _name=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --body)
+        _body="${_val:-}"
+        shift
+        ;;
+      --folder)
+        _folder_name="${_val:-}"
+        shift
+        ;;
+      --name)
+        _name="${_val:-}"
+        shift
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  if [[ -z "${_id:-}" ]]
+  then
+    return 1
+  fi
+
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _folder_name="notes.sh"
+  fi
+
+  if [[ -z "${_body:-}" ]] && [[ -z "${_name:-}" ]]
+  then
+    return 1
+  fi
+
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _folder_name="notes.sh"
+  fi
+
+
+  local _script_header=
+  local _script_body=
+  local _script_name=
+  local _script_footer=
+
+  read -r -d '' _script_header <<HEREDOC
+tell application "Notes"
+  tell account "iCloud"
+    tell folder "${_folder_name}"
+      tell note ${_id}
+HEREDOC
+  if [[ -n "${_body:-}" ]]
+  then
+    _script_body="          set the body of it to \"${_body}\""
+  fi
+
+  if [[ -n "${_name:-}" ]]
+  then
+    _script_name="          set the name of it to \"${_name}\""
+  fi
+  read -r -d '' _script_footer <<HEREDOC
+      end tell
+    end tell
+  end tell
+end tell
+HEREDOC
+
+  osascript -e "\
+${_script_header}
+${_script_body}
+${_script_name}
+${_script_footer}" &&
+  printf "Updated Note.\\n"
+} && _main "${@:-}"

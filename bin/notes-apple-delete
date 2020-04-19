@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+###############################################################################
+# notes-apple-delete
+#
+# Usage:
+#   notes-apple-delete <id> [--folder <name>]
+###############################################################################
+
+_main() {
+  local _folder_name=
+  local _force=0
+  local _id=
+  local _script=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --folder)
+        _folder_name="${_val:-}"
+        shift
+        ;;
+      -f|--force)
+        _force=1
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  [[ -z "${_id:-}" ]] && return 1
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _folder_name="notes.sh"
+  fi
+
+  if ! ((_force))
+  then
+    printf "Deleting '%s' in folder '%s'\\n" "${_id}" "${_folder_name}"
+    while true
+    do
+      read -r -p "Are you sure you want to proceed? [y/N] " __yn
+      case ${__yn} in
+        [Yy]*)
+          break
+          ;;
+        *)
+          printf "Exiting...\\n"
+          exit 0
+          ;;
+      esac
+    done
+  fi
+
+  read -r -d '' _script <<HEREDOC
+tell application "Notes"
+  tell account "iCloud"
+    tell folder "${_folder_name}"
+      delete note ${_id}
+    end tell
+  end tell
+end tell
+HEREDOC
+
+  osascript -e "${_script}"
+} && _main "${@:-}"
