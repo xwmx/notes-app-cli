@@ -70,8 +70,8 @@ Usage:
                 [--folder <folder>]
 
 Options:
-  --account    <account>        The account containing the new note.
-  --folder     <folder>         The folder containing the new note.
+  --account <account>  The account containing the new note.
+  --folder  <folder>   The folder containing the new note.
 
 Description:
   Add a new note.
@@ -119,7 +119,7 @@ Usage:
   notes-app folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
 
 Options:
-  --account <name>  The accout containing the folder.
+  --account <name>              The accout containing the folder.
   --properties <prop1>,<prop2>  A comma-separated list of property names to
                                 include in the output. Set to 'all' to include
                                 all properties.
@@ -142,8 +142,8 @@ Usage:
                  [--properties <prop1>,<prop2>]
 
 Options:
-  --account <account>  The account containing the note.
-  --folder  <folder>   The folder containing the note.
+  --account <account>           The account containing the note.
+  --folder  <folder>            The folder containing the note.
   --properties <prop1>,<prop2>  A comma-separated list of property names to
                                 include in the output. Set to 'all' to include
                                 all properties.
@@ -160,7 +160,7 @@ Available Properties:
   body
 
 Description:
-  List notes.
+  List notes
 ```
 
 #### `show`
