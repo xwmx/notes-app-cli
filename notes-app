@@ -405,6 +405,82 @@ _get_hash() {
   printf "%s\\n" "${_hash}"
 }
 
+
+# _get_id_normalized()
+#
+# Usage:
+#   _get_id_normalized <id>
+#
+# Returns:
+#   Return a formatted id suitable for including in AppleScript.
+_get_id_normalized() {
+  local _id="${1:-}"
+  if [[ -z "${_id:-}" ]]
+  then
+    return 1
+  elif [[ "$(_get_id_type "${_id}")" == "id" ]]
+  then
+    _id="\"${_id}\""
+  elif [[ "$(_get_id_type "${_id}")" == "number" ]]
+  then # enclose name in quotes
+    _id="\"${_id}\""
+  fi
+
+  printf "%s\\n" "${_id}"
+}
+
+# _get_id_selector()
+#
+# Usage:
+#   _get_id_selector <id>
+#
+# Returns:
+#   A formatted id suitable as a simple selector in AppleScript.
+_get_id_selector() {
+  local _id="${1:-}"
+  if [[ -z "${_id:-}" ]]
+  then
+    return 1
+  elif [[ "$(_get_id_type "${_id}")" == "id" ]]
+  then
+    _id="id \"${_id}\""
+  elif [[ "$(_get_id_type "${_id}")" == "number" ]]
+  then # enclose name in quotes
+    _id="\"${_id}\""
+  fi
+
+  printf "%s\\n" "${_id}"
+}
+
+# _get_id_type()
+#
+# Usage:
+#   _get_id_type <id>
+#
+# Returns:
+#   id      If id is a Notes.app id.
+#   name    If the id is a name.
+#   number  If the id is a number.
+_get_id_type() {
+  local _id="${1:-}"
+  local _type=
+
+  if [[ -z "${_id:-}" ]]
+  then
+    return 1
+  elif [[ "${_id}" =~ x\-coredata\:\/\/ ]]
+  then
+    _type="id"
+  elif [[ ! "${_id}" =~ ^[[:digit:]]+$ ]]
+  then
+    _type="number"
+  else
+    _type="name"
+  fi
+
+  printf "%s\\n" "${_type}"
+}
+
 # _highlight()
 #
 # Usage:
@@ -455,29 +531,6 @@ _join() {
   printf "%s" "${1}"
   shift
   printf "%s" "${@/#/${_delimiter}}" | tr -d '[:space:]'
-}
-
-# _normalize_id()
-#
-# Usage:
-#   _normalize_id <id>
-#
-# Returns:
-#   Return a formatted id suitable for including in AppleScript.
-_normalize_id() {
-  local _id="${1:-}"
-  if [[ -z "${_id:-}" ]]
-  then
-    return 1
-  elif [[ "${_id}" =~ x\-coredata\:\/\/ ]]
-  then
-    _id="id \"${_id}\""
-  elif [[ ! "${_id}" =~ ^[[:digit:]]+$ ]]
-  then # enclose name in quotes
-    _id="\"${_id}\""
-  fi
-
-  printf "%s\\n" "${_id}"
 }
 
 # __option_value_is_present()
@@ -1369,8 +1422,18 @@ _folders() {
 
   if [[ -z "${_account_name:-}" ]]
   then
+    _help "folders"
     return 1
+  else
+    _account_name="$(_get_id_normalized "${_account_name}")"
   fi
+
+  if [[ -n "${_folder_name:-}" ]]
+  then
+    _folder_name="$(_get_id_normalized "${_folder_name}")"
+  fi
+
+  _debug printf "\${_folder_name}: %s\\n" "${_folder_name:-}"
 
   local _script_footer=
   local _script_header=
@@ -1380,7 +1443,7 @@ _folders() {
   then
     read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  set myAccount to first account whose name = "${_account_name}"
+  set myAccount to first account whose name = ${_account_name}
   tell myAccount
     set myFolders to folders of myAccount
     set myCounter to 0
@@ -1402,11 +1465,22 @@ HEREDOC
 end tell
 HEREDOC
   else
+    local _folder_query=
+    if [[ "$(_get_id_type "${_folder_name}")" == "id" ]]
+    then
+      _folder_query="set myFolder to first folder whose id = ${_folder_name}"
+    elif [[ "$(_get_id_type "${_folder_name}")" == "number" ]]
+    then
+      _folder_query="set myFolder to first folder ${_folder_name}"
+    else
+      _folder_query="set myFolder to first folder whose name = \"${_folder_name}\""
+    fi
+
     read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  set myAccount to first account whose name = "${_account_name}"
+  set myAccount to first account whose name = ${_account_name}
   tell myAccount
-    set myFolder to first folder whose name = "${_folder_name}"
+    ${_folder_query}
     tell myFolder
       set myFolders to folders of myFolder
       set myCounter to 0
@@ -1542,11 +1616,21 @@ _list() {
 
   _debug printf "\${_properties}: %s\\n" "${_properties[*]:-}"
 
-  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
+  if [[ -z "${_account_name:-}" ]]
   then
+    _help "list"
     return 1
+  else
+    _account_name="$(_get_id_normalized "${_account_name}")"
   fi
 
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _help "list"
+    return 1
+  else
+    _folder_name="$(_get_id_normalized "${_folder_name}")"
+  fi
 
   local _script_footer=
   local _script_header=
@@ -1732,7 +1816,7 @@ _show() {
     _help "show"
     return 1
   else
-    _id="$(_normalize_id "${_id}")"
+    _id="$(_get_id_selector "${_id}")"
   fi
 
   if ((_open_in_app))
