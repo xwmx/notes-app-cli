@@ -444,7 +444,7 @@ _get_id_selector() {
   elif [[ "$(_get_id_type "${_id}")" == "id" ]]
   then
     _id="id \"${_id}\""
-  elif [[ "$(_get_id_type "${_id}")" == "number" ]]
+  elif [[ ! "$(_get_id_type "${_id}")" == "number" ]]
   then # enclose name in quotes
     _id="\"${_id}\""
   fi
@@ -1809,10 +1809,12 @@ _show() {
 
   _debug printf "\${_properties}: %s\\n" "${_properties[*]:-}"
 
-  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
+  if [[ -z "${_account_name:-}" ]]
   then
     _help "show"
     return 1
+  else
+    _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
   if [[ -z "${_folder_name:-}" ]]
@@ -1835,8 +1837,8 @@ _show() {
   then
     read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
-  tell account "${_account_name}"
-    tell folder "${_folder_name}"
+  tell account ${_account_name}
+    tell folder ${_folder_name}
       show note ${_id}
     end tell
   end tell
@@ -1854,7 +1856,7 @@ HEREDOC
 
     read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  tell account "${_account_name}"
+  tell account ${_account_name}
     tell folder ${_folder_name}
       tell note ${_id}
         set noteId to get id
