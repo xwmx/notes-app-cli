@@ -1,10 +1,10 @@
 #!/bin/bash
 ###############################################################################
-# Apple Notes CLI
+# Notes.app CLI
 #
-# A command line interface for Apple Notes.
+# A command line interface for Notes.app.
 #
-# https://github.com/xwmx/apple-notes-cli
+# https://github.com/xwmx/notes-app-cli
 #
 # Based on Bash Boilerplate: https://github.com/xwmx/bash-boilerplate
 #
@@ -47,12 +47,12 @@ _MY_PATH="$(cd "$(dirname "$0")"; pwd)/$(basename "${0}")"
 # $_MY_PROJECT_NAME
 #
 # Set to the program's project name.
-_MY_PROJECT_NAME="apple-notes-cli"
+_MY_PROJECT_NAME="notes-app-cli"
 
 # $_MY_GITHUB_REPO
 #
 # Set to the program's primary GitHub repository URL.
-_MY_GITHUB_REPO="xwmx/apple-notes-cli"
+_MY_GITHUB_REPO="xwmx/notes-app-cli"
 
 # extglob
 #
@@ -78,13 +78,13 @@ else # macOS
 fi
 
 ###############################################################################
-# .apple-notesrc
+# .notes-apprc
 ###############################################################################
 
-# .apple-notesrc
+# .notes-apprc
 #
-# If a `.apple-notesrc` file exists in `$HOME`, source it.
-export _MY_RC_PATH="${_MY_RC_PATH:-${HOME}/.apple-notesrc}"
+# If a `.notes-apprc` file exists in `$HOME`, source it.
+export _MY_RC_PATH="${_MY_RC_PATH:-${HOME}/.notes-apprc}"
 if [[ -e "${_MY_RC_PATH}" ]]
 then
   _MY_RC_PATH="$(realpath "${_MY_RC_PATH}")"
@@ -750,8 +750,8 @@ Description:
   Manage completion scripts.
 HEREDOC
 _completions() {
-  local _bash_file_name="apple-notes"
-  local _zsh_file_name="_apple-notes"
+  local _bash_file_name="notes-app"
+  local _zsh_file_name="_notes-app"
 
   # Usage: _completions_check
   _completions_check() {
@@ -1397,17 +1397,17 @@ _version() {
 }
 
 ###############################################################################
-# _apple_notes_main()
+# _notes_app_main()
 ###############################################################################
 
-# _apple_notes_main()
+# _notes_app_main()
 #
 # Description:
 #   Call the appropriate subcommand.
-_apple_notes_main() {
-  _debug printf "_apple_notes_main() >> start\\n"
-  _debug printf "_apple_notes_main() \${@}: '%s'\\n" "${@}"
-  _debug printf "_apple_notes_main() \${_SUBCOMMAND}: '%s'\\n" "${_SUBCOMMAND}"
+_notes_app_main() {
+  _debug printf "_notes_app_main() >> start\\n"
+  _debug printf "_notes_app_main() \${@}: '%s'\\n" "${@}"
+  _debug printf "_notes_app_main() \${_SUBCOMMAND}: '%s'\\n" "${_SUBCOMMAND}"
 
   # Set `$_SUBCOMMAND` if it's still blank.
   if [[ -z "${_SUBCOMMAND:-}" ]]
@@ -1624,7 +1624,7 @@ _main() {
   then
     _version
   else
-    _apple_notes_main "${_ARGUMENTS[@]:-}"
+    _notes_app_main "${_ARGUMENTS[@]:-}"
   fi
 }
 

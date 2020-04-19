@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###############################################################################
-# notes-apple-update
+# notes-app-update
 #
 # Usage:
-#   notes-apple-update <id> [--folder <name>] (--body <body> | --name <name>)
+#   notes-app-update <id> [--folder <name>] (--body <body> | --name <name>)
 ###############################################################################
 
 _main() {

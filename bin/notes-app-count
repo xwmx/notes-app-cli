@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###############################################################################
-# notes-apple-count
+# notes-app-count
 #
 # Usage:
-#   notes-apple-count [<folder name>]
+#   notes-app-count [<folder name>]
 ###############################################################################
 
 _main() {

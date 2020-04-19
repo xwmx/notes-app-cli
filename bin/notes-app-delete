@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###############################################################################
-# notes-apple-delete
+# notes-app-delete
 #
 # Usage:
-#   notes-apple-delete <id> [--folder <name>]
+#   notes-app-delete <id> [--folder <name>]
 ###############################################################################
 
 _main() {

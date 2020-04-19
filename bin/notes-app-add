@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###############################################################################
-# notes-apple-add
+# notes-app-add
 #
 # Usage:
-#   notes-apple-add --body <body> --name <name> [--folder <name>]
+#   notes-app-add --body <body> --name <name> [--folder <name>]
 ###############################################################################
 
 _main() {

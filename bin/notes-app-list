@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###############################################################################
-# notes-apple-list
+# notes-app-list
 #
 # Usage:
-#   notes-apple-list <folder name>
+#   notes-app-list <folder name>
 ###############################################################################
 
 _main() {

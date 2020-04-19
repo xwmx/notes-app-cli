@@ -10,14 +10,14 @@ setup() {
   # `$_NOTES`
   #
   # The location of the script being tested.
-  export _PROGRAM="${BATS_TEST_DIRNAME}/../apple-notes"
+  export _PROGRAM="${BATS_TEST_DIRNAME}/../notes-app"
 
-  export _MY_DEFAULT_FOLDER_NAME="apple-notes-cli-test"
+  export _MY_DEFAULT_FOLDER_NAME="notes-app-cli-test"
 
   export _TMP_DIR
-  _TMP_DIR="$(mktemp -d /tmp/apple-notes_test.XXXXXX)" || exit 1
+  _TMP_DIR="$(mktemp -d /tmp/notes-app_test.XXXXXX)" || exit 1
 
-  export _MY_RC_PATH="${_TMP_DIR}/.apple-notesrc"
+  export _MY_RC_PATH="${_TMP_DIR}/.notes-apprc"
   export _MY_HIGHLIGHT_COLOR=3
 
   if [[ -z "${EDITOR:-}" ]] || [[ ! "${EDITOR:-}" =~ mock_editor ]]
@@ -29,7 +29,7 @@ setup() {
   # being available in `$PATH`.
   export PATH="${BATS_TEST_DIRNAME}/fixtures/bin:${PATH}"
 
-  if [[ ! "${_MY_RC_PATH}"   =~ ^/tmp/apple-notes_test ]]
+  if [[ ! "${_MY_RC_PATH}"   =~ ^/tmp/notes-app_test ]]
   then
     exit 1
   fi
@@ -38,7 +38,7 @@ setup() {
 teardown() {
   if [[ -n "${_TMP_DIR:-}" ]] &&
      [[ -e "${_TMP_DIR}"   ]] &&
-     [[ "${_TMP_DIR}" =~ ^/tmp/apple-notes_test ]]
+     [[ "${_TMP_DIR}" =~ ^/tmp/notes-app_test ]]
   then
     rm -rf "${_TMP_DIR}"
   fi

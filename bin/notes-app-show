@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###############################################################################
-# notes-apple-show
+# notes-app-show
 #
 # Usage:
-#   notes-apple-show <id> [--folder <name>] [--properties <prop1>,<prop2>]
+#   notes-app-show <id> [--folder <name>] [--properties <prop1>,<prop2>]
 ###############################################################################
 
 _main() {
