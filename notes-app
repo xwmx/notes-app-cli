@@ -826,8 +826,8 @@ Description:
   Manage completion scripts.
 HEREDOC
 _completions() {
-  local _bash_file_name="notes-app"
-  local _zsh_file_name="_notes-app"
+  local _BASH_COMP_NAME="notes-app"
+  local _ZSH_COMP_NAME="_notes-app"
 
   # Usage: _completions_check
   _completions_check() {
@@ -841,10 +841,10 @@ _completions() {
     then
       if [[ -w "${_bash_completion_path}"   ]]
       then
-        if [[ -e "${_bash_completion_path}/${_bash_file_name}" ]]
+        if [[ -e "${_bash_completion_path}/${_BASH_COMP_NAME}" ]]
         then
           _exists=1
-          printf "Exists: %s\\n" "${_bash_completion_path}/${_bash_file_name}"
+          printf "Exists: %s\\n" "${_bash_completion_path}/${_BASH_COMP_NAME}"
         fi
       else
         printf "Permission denied: %s\\n" "${_bash_completion_path}"
@@ -857,10 +857,10 @@ _completions() {
     then
       if [[ -w "${_zsh_completion_path}" ]]
       then
-        if [[ -e "${_zsh_completion_path}/${_zsh_file_name}" ]]
+        if [[ -e "${_zsh_completion_path}/${_ZSH_COMP_NAME}" ]]
         then
           _exists=1
-          printf "Exists: %s\\n" "${_zsh_completion_path}/${_zsh_file_name}"
+          printf "Exists: %s\\n" "${_zsh_completion_path}/${_ZSH_COMP_NAME}"
         fi
       else
         printf "Permission denied: %s\\n" "${_zsh_completion_path}"
@@ -965,11 +965,11 @@ HEREDOC
         if [[ "${_shell}" == "bash" ]]
         then
           _completion_path="$(_get_bash_completion_path)"
-          _completion_target="${_completion_path}/${_bash_file_name}"
+          _completion_target="${_completion_path}/${_BASH_COMP_NAME}"
         elif [[ "${_shell}" == "zsh" ]]
         then
           _completion_path="/usr/local/share/zsh/site-functions"
-          _completion_target="${_completion_path}/${_zsh_file_name}"
+          _completion_target="${_completion_path}/${_ZSH_COMP_NAME}"
         fi
 
         if [[ -n "${_completion_path:-}" ]] &&
@@ -1006,11 +1006,11 @@ HEREDOC
       if [[ "${_shell}" == "bash" ]]
       then
         _completion_path="$(_get_bash_completion_path)"
-        _completion_target="${_completion_path}/${_bash_file_name}"
+        _completion_target="${_completion_path}/${_BASH_COMP_NAME}"
       elif [[ "${_shell}" == "zsh" ]]
       then
         _completion_path="/usr/local/share/zsh/site-functions"
-        _completion_target="${_completion_path}/${_zsh_file_name}"
+        _completion_target="${_completion_path}/${_ZSH_COMP_NAME}"
       fi
 
       if [[ -n "${_completion_path:-}" ]] &&
