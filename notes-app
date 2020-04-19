@@ -1666,6 +1666,11 @@ _show() {
   local _script_header=
   local -a _script_properties=()
 
+  if [[ -z "${_properties:-}" ]]
+  then # no properties were specified
+    _properties="all"
+  fi
+
   read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   tell account "${_account_name}"
@@ -1713,11 +1718,6 @@ HEREDOC
   if [[ "${_properties}" =~ body|^all$ ]]
   then
     _script_properties+=("log noteBody")
-  fi
-
-  if [[ -z "${_script_properties[*]:-}" ]]
-  then # no properties were specified
-    _script_properties+=("log noteName")
   fi
 
   read -r -d '' _script_footer <<HEREDOC || true
