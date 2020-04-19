@@ -41,14 +41,14 @@ Usage:
                 [--folder <folder>]
   notes-app commands
   notes-app count [--account <account>] [--folder <folder>]
-  notes-app delete <id> [--account <account>] [--folder <folder>]
-  notes-app folders [show <id>] [--account <account>] [--folder <folder>]
+  notes-app delete <note> [--account <account>] [--folder <folder>]
+  notes-app folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
   notes-app list [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
-  notes-app show (<id> | <name> | <number>) [--account <account>]
-                 [--folder <folder>] [--open] [--properties <prop1>,<prop2>]
-  notes-app update <id> (--body <body> | --name <name>) [--account <account>]
+  notes-app show <note> [--account <account>] [--folder <folder>] [--open]
+                 [--properties <prop1>,<prop2>]
+  notes-app update <note> (--body <body> | --name <name>) [--account <account>]
                    [--folder <folder>]
   notes-app -h | --help | help [<subcommand>] [-l | --long]
   notes-app --version | version
@@ -73,18 +73,14 @@ Options:
   --account <account>  The account containing the new note.
   --folder  <folder>   The folder containing the new note.
 
-Description:
-  Add a new note.
-```
-
-#### `commands`
-
-```text
-Usage:
-  notes-app commands
+Identifiers:
+  <account> and <folder> can each be identified with:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
 
 Description:
-  List available commands
+  Add a new note
 ```
 
 #### `count`
@@ -101,21 +97,27 @@ Description:
 
 ```text
 Usage:
-  notes-app delete <id> [--account <account>] [--folder <folder>]
+  notes-app delete <note> [--account <account>] [--folder <folder>]
 
 Options:
   --account <account>  The account containing the note.
   --folder  <folder>   The folder containing the note.
 
+Identifiers:
+  <note>, <account>, and <folder> can each be identified with:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
 Description:
-  Delete note <id>.
+  Delete <note>.
 ```
 
 #### `folders`
 
 ```text
 Usage:
-  notes-app folders [show <id>] [--account <account>] [--folder <folder>]
+  notes-app folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
 
 Options:
@@ -124,6 +126,12 @@ Options:
   --properties <prop1>,<prop2>  A comma-separated list of property names to
                                 include in the output. Set to 'all' to include
                                 all properties.
+
+Identifiers:
+  <account> and <folder> can each be identified with:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
 
 Available Properties:
   all
@@ -149,6 +157,12 @@ Options:
                                 include in the output. Set to 'all' to include
                                 all properties.
 
+Identifiers:
+  <account> and <folder> can each be identified with:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
 Available Properties:
   all
   counter
@@ -168,8 +182,8 @@ Description:
 
 ```text
 Usage:
-  notes-app show (<id> | <name> | <number>) [--account <account>]
-                 [--folder <folder>] [--open] [--properties <prop1>,<prop2>]
+  notes-app show <note> [--account <account>] [--folder <folder>] [--open]
+                 [--properties <prop1>,<prop2>]
 
 Options:
   --account    <account>        The account containing the note.
@@ -178,6 +192,12 @@ Options:
   --properties <prop1>,<prop2>  A comma-separated list of property names to
                                 include in the output. Set to 'all' to include
                                 all properties.
+
+Identifiers:
+  <note>, <account>, and <folder> can each be identified with:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
 
 Available Properties:
   all
@@ -197,7 +217,7 @@ Description:
 
 ```text
 Usage:
-  notes-app update <id> (--body <body> | --name <name>) [--account <account>]
+  notes-app update <note> (--body <body> | --name <name>) [--account <account>]
                    [--folder <folder>]
 
 Options:
@@ -205,6 +225,12 @@ Options:
   --body    <body>     The new value for the note body.
   --folder  <folder>   The folder containing the note.
   --name    <name>     The new value for the note name.
+
+Identifiers:
+  <notes>, <account>, and <folder> can each be identified with:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
 
 Description:
   Update a note.
