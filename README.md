@@ -76,7 +76,7 @@ Options:
   --folder  <folder>   The folder containing the new note.
 
 Identifiers:
-  <account> and <folder> can each be identified with:
+  <account> and <folder> can be identified with one of the following:
     id      The Notes.app core data id (starts with 'x-coredata://').
     name    The name property.
     number  The current sequence number.
@@ -106,7 +106,7 @@ Options:
   --folder  <folder>   The folder containing the note.
 
 Identifiers:
-  <note>, <account>, and <folder> can each be identified with:
+  <note>, <account>, and <folder> can be identified with one of the following:
     id      The Notes.app core data id (starts with 'x-coredata://').
     name    The name property.
     number  The current sequence number.
@@ -130,7 +130,7 @@ Options:
                                 all properties.
 
 Identifiers:
-  <account> and <folder> can each be identified with:
+  <account> and <folder> can be identified with one of the following:
     id      The Notes.app core data id (starts with 'x-coredata://').
     name    The name property.
     number  The current sequence number.
@@ -160,7 +160,7 @@ Options:
                                 all properties.
 
 Identifiers:
-  <account> and <folder> can each be identified with:
+  <account> and <folder> can be identified with one of the following:
     id      The Notes.app core data id (starts with 'x-coredata://').
     name    The name property.
     number  The current sequence number.
@@ -196,7 +196,7 @@ Options:
                                 all properties.
 
 Identifiers:
-  <note>, <account>, and <folder> can each be identified with:
+  <note>, <account>, and <folder> can be identified with one of the following:
     id      The Notes.app core data id (starts with 'x-coredata://').
     name    The name property.
     number  The current sequence number.
@@ -229,7 +229,7 @@ Options:
   --name    <name>     The new value for the note name.
 
 Identifiers:
-  <notes>, <account>, and <folder> can each be identified with:
+  <notes>, <account>, and <folder> can be identified with one of the following:
     id      The Notes.app core data id (starts with 'x-coredata://').
     name    The name property.
     number  The current sequence number.
