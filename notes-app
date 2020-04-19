@@ -1660,7 +1660,7 @@ _list() {
     _help "list"
     return 1
   else
-    _account_name="$(_get_id_normalized "${_account_name}")"
+    _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
   if [[ -z "${_folder_name:-}" ]]
@@ -1668,7 +1668,7 @@ _list() {
     _help "list"
     return 1
   else
-    _folder_name="$(_get_id_normalized "${_folder_name}")"
+    _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
   local _script_footer=
@@ -1677,8 +1677,8 @@ _list() {
 
   read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  tell account "${_account_name}"
-    set myFolder to first folder whose name = "${_folder_name}"
+  tell account ${_account_name}
+    set myFolder to folder ${_folder_name}
     set myNotes to notes of myFolder
     set myCounter to 0
 
