@@ -879,9 +879,20 @@ _add() {
     shift
   done
 
-  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
+  if [[ -z "${_account_name:-}" ]]
   then
+    _help "add"
     return 1
+  else
+    _account_name="$(_get_id_selector "${_account_name}")"
+  fi
+
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _help "add"
+    return 1
+  else
+    _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
   if [[ -n "${_body:-}" ]] && [[ -n "${_name:-}" ]]
@@ -897,8 +908,8 @@ _add() {
 
   read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
-    tell account "${_account_name}"
-        make new note at folder "${_folder_name}" with properties ${_properties}
+    tell account ${_account_name}
+        make new note at folder ${_folder_name} with properties ${_properties}
     end tell
 end tell
 HEREDOC
