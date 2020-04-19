@@ -17,9 +17,9 @@ list, update, and delete notes.
     line of the "body" is treated as the name, making any formatting on that
     line inaccessible to `notes-app`.
 
-### Installation
+## Installation
 
-#### Homebrew
+### Homebrew
 
 To install with [Homebrew](http://brew.sh/):
 
