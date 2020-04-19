@@ -649,7 +649,7 @@ A command line interface for Notes.app on macOS.
 
 Usage:
   ${_ME} add --body <body> --name <name> [--account <account>]
-            [--folder <folder>]
+                [--folder <folder>]
   ${_ME} commands
   ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <id> [--account <account>] [--folder <folder>]
@@ -658,9 +658,9 @@ Usage:
   ${_ME} list [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
   ${_ME} show <id> [--account <account>] [--folder <folder>]
-             [--properties <prop1>,<prop2>]
+                 [--properties <prop1>,<prop2>]
   ${_ME} update <id> (--body <body> | --name <name>) [--account <account>]
-               [--folder <folder>]
+                   [--folder <folder>]
   ${_ME} -h | --help | help [<subcommand>] [-l | --long]
   ${_ME} --version | version
 
@@ -700,7 +700,7 @@ _alias_subcommand "help" "h"
 desc "add" <<HEREDOC
 Usage:
   ${_ME} add --body <body> --name <name> [--account <account>]
-            [--folder <folder>]
+                [--folder <folder>]
 
 Options:
   --account    <account>        The account containing the new note.
@@ -1534,7 +1534,7 @@ ${_script_footer}"
 desc "show" <<HEREDOC
 Usage:
   ${_ME} show <id> [--account <account>] [--folder <folder>]
-             [--properties <prop1>,<prop2>]
+                 [--properties <prop1>,<prop2>]
 
 Options:
   --account    <account>        The account containing the note.
@@ -1699,7 +1699,7 @@ ${_script_footer}"
 desc "update" <<HEREDOC
 Usage:
   ${_ME} update <id> (--body <body> | --name <name>) [--account <account>]
-               [--folder <folder>]
+                   [--folder <folder>]
 
 Options:
   --account <account>  The account containing the note.

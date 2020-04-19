@@ -13,17 +13,18 @@ A command line interface for Notes.app on macOS.
 
 Usage:
   notes-app add --body <body> --name <name> [--account <account>]
-            [--folder <folder>]
+                [--folder <folder>]
   notes-app commands
   notes-app count [--account <account>] [--folder <folder>]
   notes-app delete <id> [--account <account>] [--folder <folder>]
   notes-app folders
   notes-app folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
   notes-app list [--account <account>] [--folder <folder>]
+                 [--properties <prop1>,<prop2>]
   notes-app show <id> [--account <account>] [--folder <folder>]
-             [--properties <prop1>,<prop2>]
+                 [--properties <prop1>,<prop2>]
   notes-app update <id> (--body <body> | --name <name>) [--account <account>]
-               [--folder <folder>]
+                   [--folder <folder>]
   notes-app -h | --help | help [<subcommand>] [-l | --long]
   notes-app --version | version
 
@@ -41,7 +42,7 @@ More Information:
 ```text
 Usage:
   notes-app add --body <body> --name <name> [--account <account>]
-            [--folder <folder>]
+                [--folder <folder>]
 
 Options:
   --account    <account>        The account containing the new note.
@@ -142,7 +143,7 @@ Description:
 ```text
 Usage:
   notes-app show <id> [--account <account>] [--folder <folder>]
-             [--properties <prop1>,<prop2>]
+                 [--properties <prop1>,<prop2>]
 
 Options:
   --account    <account>        The account containing the note.
@@ -170,7 +171,7 @@ Description:
 ```text
 Usage:
   notes-app update <id> (--body <body> | --name <name>) [--account <account>]
-               [--folder <folder>]
+                   [--folder <folder>]
 
 Options:
   --account <account>  The account containing the note.
