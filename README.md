@@ -16,6 +16,8 @@ list, update, and delete notes.
     is formatted with HTML. When the note has a blank "name" line, the first
     line of the "body" is treated as the name, making any formatting on that
     line inaccessible to `notes-app`.
+- If a new note is created without a "name" specified, Notes.app sets the
+    first line to "New Note".
 
 ## Installation
 
