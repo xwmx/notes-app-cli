@@ -455,6 +455,29 @@ _join() {
   printf "%s" "${@/#/${_delimiter}}" | tr -d '[:space:]'
 }
 
+# _normalize_id()
+#
+# Usage:
+#   _normalize_id <id>
+#
+# Returns:
+#   Return a formatted id suitable for including in AppleScript.
+_normalize_id() {
+  local _id="${1:-}"
+  if [[ -z "${_id:-}" ]]
+  then
+    return 1
+  elif [[ "${_id}" =~ x\-coredata\:\/\/ ]]
+  then
+    _id="id \"${_id}\""
+  elif [[ ! "${_id}" =~ ^[[:digit:]]+$ ]]
+  then # enclose name in quotes
+    _id="\"${_id}\""
+  fi
+
+  printf "%s\\n" "${_id}"
+}
+
 # __option_value_is_present()
 #
 # Usage:
@@ -1662,12 +1685,8 @@ _show() {
   then
     _help "show"
     return 1
-  elif [[ "${_id}" =~ x\-coredata\:\/\/ ]]
-  then
-    _id="id \"${_id}\""
-  elif [[ ! "${_id}" =~ ^[[:digit:]]+$ ]]
-  then # enclose name in quotes
-    _id="\"${_id}\""
+  else
+    _id="$(_normalize_id "${_id}")"
   fi
 
   if ((_open_in_app))
