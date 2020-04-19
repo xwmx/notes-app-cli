@@ -820,7 +820,7 @@ HEREDOC
 
   _debug printf "\${_script}: %s\\n" "${_script:-}"
 
-  osascript -e "${_script}"
+  osascript -e "${_script}" 2>&1
 }
 
 # commands ####################################################################
@@ -1144,7 +1144,7 @@ tell application "Notes"
 end tell
 HEREDOC
 
-  osascript -e "${_script}"
+  osascript -e "${_script}" 2>&1
 }
 
 # delete ######################################################################
@@ -1242,7 +1242,7 @@ tell application "Notes"
 end tell
 HEREDOC
 
-  osascript -e "${_script}"
+  osascript -e "${_script}" 2>&1
 }
 
 # edit ########################################################################
@@ -1387,7 +1387,7 @@ ${_script_footer}"
 
   _debug printf "\${_script}: %s\\n" "${_script}"
 
-  osascript -e "${_script}"
+  osascript -e "${_script}" 2>&1
 }
 
 # list ########################################################################
@@ -1560,7 +1560,7 @@ ${_script_footer}"
 
   _debug printf "\${_script}: %s\\n" "${_script}"
 
-  osascript -e "${_script}"
+  osascript -e "${_script}" 2>&1
 }
 
 # show ########################################################################
@@ -1733,7 +1733,7 @@ ${_script_footer}"
 
   _debug printf "\${_script}: %s\\n" "${_script}"
 
-  osascript -e "${_script}"
+  osascript -e "${_script}" 2>&1
 }
 
 # update ######################################################################
@@ -1866,7 +1866,7 @@ ${_script_footer}"
 
   _debug printf "\${_script}: %s\\n" "${_script}"
 
-  osascript -e "${_script}" &&
+  osascript -e "${_script}" 2>&1 &&
     printf "Updated Note.\\n"
 }
 
