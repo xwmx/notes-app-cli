@@ -46,8 +46,8 @@ Usage:
   notes-app folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
   notes-app list [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
-  notes-app show (<id> | <name>) [--account <account>] [--folder <folder>]
-                 [--properties <prop1>,<prop2>]
+  notes-app show (<id> | <name> | <number>) [--account <account>]
+                 [--folder <folder>] [--open] [--properties <prop1>,<prop2>]
   notes-app update <id> (--body <body> | --name <name>) [--account <account>]
                    [--folder <folder>]
   notes-app -h | --help | help [<subcommand>] [-l | --long]
@@ -167,12 +167,13 @@ Description:
 
 ```text
 Usage:
-  notes-app show (<id> | <name>) [--account <account>] [--folder <folder>]
-                 [--properties <prop1>,<prop2>]
+  notes-app show (<id> | <name> | <number>) [--account <account>]
+                 [--folder <folder>] [--open] [--properties <prop1>,<prop2>]
 
 Options:
   --account    <account>        The account containing the note.
   --folder     <folder>         The folder containing the note.
+  --open                        Open the note in Notes.app.
   --properties <prop1>,<prop2>  A comma-separated list of property names to
                                 include in the output. Set to 'all' to include
                                 all properties.
@@ -188,7 +189,7 @@ Available Properties:
   body
 
 Description:
-  Show a note idenitied by <id> or <name>.
+  Show a note idenitied by <id>, <name>, or <number>.
 ```
 
 #### `update`
