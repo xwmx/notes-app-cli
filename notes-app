@@ -656,6 +656,7 @@ Usage:
   ${_ME} folders
   ${_ME} folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
   ${_ME} list [--account <account>] [--folder <folder>]
+                 [--properties <prop1>,<prop2>]
   ${_ME} show <id> [--account <account>] [--folder <folder>]
              [--properties <prop1>,<prop2>]
   ${_ME} update <id> (--body <body> | --name <name>) [--account <account>]
@@ -1360,31 +1361,94 @@ ${_script_footer}"
 desc "list" <<HEREDOC
 Usage:
   ${_ME} list [--account <account>] [--folder <folder>]
+                 [--properties <prop1>,<prop2>]
 
 Options:
   --account <account>  The account containing the note.
   --folder  <folder>   The folder containing the note.
+  --properties <prop1>,<prop2>  A comma-separated list of property names to
+                                include in the output. Set to 'all' to include
+                                all properties.
+
+Available Properties:
+  all
+  counter
+  id
+  container
+  passwordProtected
+  creationDate
+  modificationDate
+  name
+  body
 
 Description:
   List notes.
 HEREDOC
 _list() {
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
   local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _properties=
 
-  if [[ "${1:-}" == "--folder" ]]
-  then
-    _folder_name="${2:-}"
-  fi
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
 
-  if [[ -z "${_folder_name:-}" ]]
+    case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "list"
+          return 1
+        fi
+        ;;
+      --folder)
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "list"
+          return 1
+        fi
+        ;;
+      --properties)
+        if [[ -n "${_val:-}" ]] && [[ ! "${_val:-}" =~ ^- ]]
+        then
+          _properties="$(printf "%s\\n" "${_val}" | tr ',' ' ')"
+        else
+          _help "folders"
+          return 1
+        fi
+        shift
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  _debug printf "\${_properties}: %s\\n" "${_properties[*]:-}"
+
+  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
   then
-    _help "list"
     return 1
   fi
 
-  local _script=
 
-  read -r -d '' _script <<HEREDOC || true
+  local _script_footer=
+  local _script_header=
+  local -a _script_properties=()
+
+  read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   tell account "iCloud"
     set myFolder to first folder whose name = "${_folder_name}"
@@ -1401,20 +1465,66 @@ tell application "Notes"
         set noteModificationDate to get modification date
         set noteName to get name
         set noteBody to get body
+HEREDOC
 
-        log myCounter
-        log noteContainer
-        log noteId
-        log notePasswordProtected
-        log noteCreationDate
-        log noteModificationDate
-        log noteName
-        log noteBody
+  if [[ "${_properties}" =~ counter|^all$ ]]
+  then
+    _script_properties+=("log myCounter")
+  fi
+
+  if [[ "${_properties}" =~ id|^all$ ]]
+  then
+    _script_properties+=("log noteId")
+  fi
+
+  if [[ "${_properties}" =~ container|^all$ ]]
+  then
+    _script_properties+=("log noteContainer")
+  fi
+
+  if [[ "${_properties}" =~ passwordProtected|^all$ ]]
+  then
+    _script_properties+=("log notePasswordProtected")
+  fi
+
+  if [[ "${_properties}" =~ creationDate|^all$ ]]
+  then
+    _script_properties+=("log noteCreationDate")
+  fi
+
+  if [[ "${_properties}" =~ modificationDate|^all$ ]]
+  then
+    _script_properties+=("log noteModificationDate")
+  fi
+
+  if [[ "${_properties}" =~ name|^all$ ]]
+  then
+    _script_properties+=("log noteName")
+  fi
+
+  if [[ "${_properties}" =~ body|^all$ ]]
+  then
+    _script_properties+=("log noteBody")
+  fi
+
+  if [[ -z "${_script_properties[*]:-}" ]]
+  then # no properties were specified
+    _script_properties+=("log noteId")
+  fi
+
+  read -r -d '' _script_footer <<HEREDOC || true
       end tell
     end repeat
   end tell
 end tell
 HEREDOC
+
+local _script="\
+${_script_header}
+${_script_properties[*]:-}
+${_script_footer}"
+
+  _debug printf "\${_script}: %s\\n" "${_script}"
 
   osascript -e "${_script}"
 }
@@ -1563,7 +1673,7 @@ HEREDOC
   fi
 
   if [[ -z "${_script_properties[*]:-}" ]]
-  then
+  then # no properties were specified
     _script_properties+=("log noteId")
   fi
 

@@ -112,7 +112,26 @@ Description:
 
 ```text
 Usage:
-  notes-app list [--folder <folder>]
+  notes-app list [--account <account>] [--folder <folder>]
+                 [--properties <prop1>,<prop2>]
+
+Options:
+  --account <account>  The account containing the note.
+  --folder  <folder>   The folder containing the note.
+  --properties <prop1>,<prop2>  A comma-separated list of property names to
+                                include in the output. Set to 'all' to include
+                                all properties.
+
+Available Properties:
+  all
+  counter
+  id
+  container
+  passwordProtected
+  creationDate
+  modificationDate
+  name
+  body
 
 Description:
   List notes.
