@@ -550,16 +550,17 @@ _spinner() {
 #   1  If not.
 _validate_account_contains_folder() {
   local _account_name="${1:-}"
-  local _folder_name="${1:-}"
+  local _folder_name="${2:-}"
 
   if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
   then
     return 1
   fi
 
-  local _account_folders="$(_folders --account "${_account_name}")"
+  local _account_folders
+  _account_folders="$(_folders --account "${_account_name}")"
 
-  _contains "${_folder_name}" "${_account_folders[*]}"
+  _contains "${_folder_name}" "${_account_folders[@]}"
 }
 
 ###############################################################################
@@ -1126,12 +1127,12 @@ _count() {
   if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
   then
     return 1
-  # elif [[ -n "${_folder_name:-}" ]] &&
-  #   ! _validate_account_contains_folder "${_account_name}" "${_folder_name}"
-  # then
-  #   printf "Account '%s' does not contain folder '%s'.\\n" \
-  #     "${_account_name}" "${_folder_name}"
-  #   return 1
+  elif [[ -n "${_folder_name:-}" ]] &&
+    ! _validate_account_contains_folder "${_account_name}" "${_folder_name}"
+  then
+    printf "Account '%s' does not contain folder '%s'.\\n" \
+      "${_account_name}" "${_folder_name}"
+    return 1
   fi
 
   local _script=
