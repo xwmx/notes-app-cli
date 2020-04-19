@@ -1340,6 +1340,11 @@ HEREDOC
     _script_properties+=("log folderName")
   fi
 
+  if [[ -z "${_script_properties[*]:-}" ]]
+  then # no properties were specified
+    _script_properties+=("log folderName")
+  fi
+
   read -r -d '' _script_footer <<HEREDOC || true
     end tell
   end repeat
@@ -1509,7 +1514,7 @@ HEREDOC
 
   if [[ -z "${_script_properties[*]:-}" ]]
   then # no properties were specified
-    _script_properties+=("log noteId")
+    _script_properties+=("log noteName")
   fi
 
   read -r -d '' _script_footer <<HEREDOC || true
@@ -1674,7 +1679,7 @@ HEREDOC
 
   if [[ -z "${_script_properties[*]:-}" ]]
   then # no properties were specified
-    _script_properties+=("log noteId")
+    _script_properties+=("log noteName")
   fi
 
   read -r -d '' _script_footer <<HEREDOC || true
