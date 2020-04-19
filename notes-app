@@ -616,12 +616,19 @@ _help() {
   if [[ -z "${1:-}" ]] || [[ "${1}" =~ ^-l$|^--long$ ]]
   then
     cat <<HEREDOC
-Apple Notes CLI
+Notes.app CLI
 
-A command line interface for Apple Notes.
+A command line interface for Notes.app on macOS.
 
 Usage:
-  ${_ME}
+  ${_ME} add --body <body> --name <name> [--folder <name>]
+  ${_ME} commands
+  ${_ME} count [<folder>]
+  ${_ME} delete <id> [--folder <name>]
+  ${_ME} folders
+  ${_ME} list [<folder>]
+  ${_ME} show <id> [--folder <name>] [--properties <prop1>,<prop2>]
+  ${_ME} update <id> [--folder <name>] (--body <body> | --name <name>)
   ${_ME} -h | --help | help [<subcommand>] [-l | --long]
   ${_ME} --version | version
 
@@ -661,6 +668,9 @@ _alias_subcommand "help" "h"
 desc "add" <<HEREDOC
 Usage:
   ${_ME} add --body <body> --name <name> [--folder <name>]
+
+Description:
+  Add a new note.
 HEREDOC
 _add() {
   local _body=
@@ -984,10 +994,10 @@ HEREDOC
 
 desc "count" <<HEREDOC
 Usage:
-  ${_ME} count <folder name>
+  ${_ME} count [<folder>]
 
 Description:
-  Print the number of notes in <folder name>
+  Print the number of notes in <folder>
 HEREDOC
 _count() {
   local _folder_name="${1:-}"
@@ -1014,6 +1024,9 @@ HEREDOC
 desc "delete" <<HEREDOC
 Usage:
   ${_ME} delete <id> [--folder <name>]
+
+Description:
+  Delete note <id>.
 HEREDOC
 _delete() {
   local _folder_name=
@@ -1108,7 +1121,7 @@ Usage:
   ${_ME} folders
 
 Description:
-  Print the Notes.app folders in the current account.
+  List folders in the current account.
 HEREDOC
 _folders() {
   local _account_name="${1:-iCloud}"
@@ -1147,7 +1160,10 @@ HEREDOC
 
 desc "list" <<HEREDOC
 Usage:
-  ${_ME} list <folder name>
+  ${_ME} list [<folder>]
+
+Description:
+  List notes.
 HEREDOC
 _list() {
   local _folder_name="${1:-}"
@@ -1202,14 +1218,17 @@ Options:
   --properties  A comma-separated list of property names for the note.
                 Set to 'all' to include all properties.
 
-                Available Properties:
-                  noteId
-                  noteContainer
-                  notePasswordProtected
-                  noteCreationDate
-                  noteModificationDate
-                  noteName
-                  noteBody
+Available Properties:
+  noteId
+  noteContainer
+  notePasswordProtected
+  noteCreationDate
+  noteModificationDate
+  noteName
+  noteBody
+
+Description:
+  Show a note.
 HEREDOC
 _show() {
   local _folder_name=
@@ -1336,6 +1355,9 @@ ${_script_footer}"
 desc "update" <<HEREDOC
 Usage:
   ${_ME} update <id> [--folder <name>] (--body <body> | --name <name>)
+
+Description:
+  Update a note.
 HEREDOC
 _update() {
   local _body=
@@ -1571,6 +1593,7 @@ _SUBCOMMANDS=(
   delete
   env
   folders
+  h
   help
   list
   show
