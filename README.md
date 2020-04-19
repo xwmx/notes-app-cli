@@ -1,6 +1,21 @@
-# Notes.app CLI
+# `notes-app` - Notes.app CLI
 
 A command line interface for Notes.app on macOS.
+
+`notes-app` uses AppleScript to interact with Notes.app to create,
+list, update, and delete notes.
+
+## Quirks
+
+- Requires macOS
+- Notes.app must be open. `notes-app` will open it in background if it's
+    not already open.
+- The formatting of the first line in a note is not preserved. Notes.app treats
+    the first line of a note as the "name" of the note and does not allow
+    formatting of this line through AppleScript, while the "body" of the note
+    is formatted with HTML. When the note has a blank "name" line, the first
+    line of the "body" is treated as the name, making any formatting on that
+    line inaccessible to `notes-app`.
 
 ## Usage
 
