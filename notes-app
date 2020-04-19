@@ -1,5 +1,7 @@
 #!/bin/bash
 ###############################################################################
+# NOTE: Use /bin/bash to ensure script uses macOS Bash version.
+#
 # Notes.app CLI
 #
 # A command line interface for Notes.app.
