@@ -2,8 +2,6 @@
 
 A command line interface for Notes.app on macOS.
 
-This project is in a pre-alpha, proof-of-concept state. Use at your own risk.
-
 ## Usage
 
 ### Help
