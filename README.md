@@ -43,7 +43,8 @@ Usage:
   notes-app count [--account <account>] [--folder <folder>]
   notes-app delete <id> [--account <account>] [--folder <folder>]
   notes-app folders
-  notes-app folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
+  notes-app folders show <id> [--account <account>] [--folder <folder>]
+                         [--properties <prop1>,<prop2>]
   notes-app list [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
   notes-app show (<id> | <name> | <number>) [--account <account>]
@@ -116,10 +117,12 @@ Description:
 ```text
 Usage:
   notes-app folders
-  notes-app folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
+  notes-app folders show <id> [--account <account>] [--folder <folder>]
+                         [--properties <prop1>,<prop2>]
 
 Options:
-  --account <name>              The account containing the folder.
+  --account    <account>        The account containing the folder.
+  --folder     <folder>         The parent folder, if any.
   --properties <prop1>,<prop2>  A comma-separated list of property names to
                                 include in the output. Set to 'all' to include
                                 all properties.

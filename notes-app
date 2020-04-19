@@ -701,7 +701,8 @@ Usage:
   ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <id> [--account <account>] [--folder <folder>]
   ${_ME} folders
-  ${_ME} folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
+  ${_ME} folders show <id> [--account <account>] [--folder <folder>]
+                         [--properties <prop1>,<prop2>]
   ${_ME} list [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
   ${_ME} show (<id> | <name> | <number>) [--account <account>]
@@ -1293,10 +1294,12 @@ _env() {
 desc "folders" <<HEREDOC
 Usage:
   ${_ME} folders
-  ${_ME} folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
+  ${_ME} folders show <id> [--account <account>] [--folder <folder>]
+                         [--properties <prop1>,<prop2>]
 
 Options:
-  --account <name>              The account containing the folder.
+  --account    <account>        The account containing the folder.
+  --folder     <folder>         The parent folder, if any.
   --properties <prop1>,<prop2>  A comma-separated list of property names to
                                 include in the output. Set to 'all' to include
                                 all properties.
@@ -1327,6 +1330,16 @@ _folders() {
           shift
         else
           _help "folders"
+          return 1
+        fi
+        ;;
+      --folder)
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "add"
           return 1
         fi
         ;;
