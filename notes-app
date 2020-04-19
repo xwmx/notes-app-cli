@@ -44,7 +44,7 @@ fi
 # $_VERSION
 #
 # The most recent program version.
-_VERSION="0.0.1-alpha"
+_VERSION="0.0.1"
 
 # $_ME
 #
