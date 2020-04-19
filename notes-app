@@ -2050,12 +2050,26 @@ _update() {
 
   if [[ -z "${_id:-}" ]]
   then
+    _help "update"
     return 1
+  else
+    _id="$(_get_id_selector "${_id}")"
   fi
 
-  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
+  if [[ -z "${_account_name:-}" ]]
   then
+    _help "update"
     return 1
+  else
+    _account_name="$(_get_id_selector "${_account_name}")"
+  fi
+
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _help "update"
+    return 1
+  else
+    _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
   if [[ -z "${_body:-}" ]] && [[ -z "${_name:-}" ]]
@@ -2070,18 +2084,18 @@ _update() {
 
   read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  tell account "${_account_name}"
-    tell folder "${_folder_name}"
+  tell account ${_account_name}
+    tell folder ${_folder_name}
       tell note ${_id}
 HEREDOC
   if [[ -n "${_body:-}" ]]
   then
-    _script_body="          set the body of it to \"${_body}\""
+    _script_body="set the body of it to \"${_body}\""
   fi
 
   if [[ -n "${_name:-}" ]]
   then
-    _script_name="          set the name of it to \"${_name}\""
+    _script_name="set the name of it to \"${_name}\""
   fi
   read -r -d '' _script_footer <<HEREDOC || true
       end tell
