@@ -104,8 +104,8 @@ Usage:
   notes-app delete <id> [--account <account>] [--folder <folder>]
 
 Options:
-  --account    <account>        The account containing the note.
-  --folder     <folder>         The folder containing the note.
+  --account <account>  The account containing the note.
+  --folder  <folder>   The folder containing the note.
 
 Description:
   Delete note <id>.
