@@ -1309,12 +1309,29 @@ _delete() {
     shift
   done
 
-  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
+  if [[ -z "${_account_name:-}" ]]
   then
+    _help "show"
     return 1
+  else
+    _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
-  [[ -z "${_id:-}" ]] && return 1
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _help "show"
+    return 1
+  else
+    _folder_name="$(_get_id_selector "${_folder_name}")"
+  fi
+
+  if [[ -z "${_id:-}" ]]
+  then
+    _help "show"
+    return 1
+  else
+    _id="$(_get_id_selector "${_id}")"
+  fi
 
   if ! ((_force))
   then
@@ -1336,8 +1353,8 @@ _delete() {
 
   read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
-  tell account "${_account_name}"
-    tell folder "${_folder_name}"
+  tell account ${_account_name}
+    tell folder ${_folder_name}
       delete note ${_id}
     end tell
   end tell
