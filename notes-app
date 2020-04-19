@@ -60,11 +60,13 @@ _MY_PATH="$(cd "$(dirname "$0")"; pwd)/$(basename "${0}")"
 # $_MY_PROJECT_NAME
 #
 # Set to the program's project name.
+# shellcheck disable=SC2034
 _MY_PROJECT_NAME="notes-app-cli"
 
 # $_MY_GITHUB_REPO
 #
 # Set to the program's primary GitHub repository URL.
+# shellcheck disable=SC2034
 _MY_GITHUB_REPO="xwmx/notes-app-cli"
 
 # extglob
