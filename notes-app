@@ -1100,6 +1100,49 @@ _env() {
   printf "_MY_RC_PATH=%s\\n" "${_MY_RC_PATH}"
 }
 
+
+# folders #####################################################################
+
+desc "folders" <<HEREDOC
+Usage:
+  ${_ME} folders
+
+Description:
+  Print the Notes.app folders in the current account.
+HEREDOC
+_folders() {
+  local _account_name="${1:-iCloud}"
+  if [[ -z "${_account_name:-}" ]]
+  then
+    return 1
+  fi
+  local _script=
+
+  read -r -d '' _script <<HEREDOC || true
+tell application "Notes"
+  set myAccount to first account whose name = "${_account_name}"
+  set myFolders to folders of myAccount
+  set myCounter to 0
+
+  repeat with theFolder in myFolders
+    tell theFolder
+      set myCounter to myCounter + 1
+      set folderContainer to get container
+      set folderId to get id
+      set folderName to get name
+
+      log myCounter
+      log folderContainer
+      log folderId
+      log folderName
+    end tell
+  end repeat
+end tell
+HEREDOC
+
+  osascript -e "${_script}"
+}
+
 # list ########################################################################
 
 desc "list" <<HEREDOC
@@ -1527,6 +1570,7 @@ _SUBCOMMANDS=(
   count
   delete
   env
+  folders
   help
   list
   show
