@@ -658,7 +658,7 @@ Usage:
   ${_ME} folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
   ${_ME} list [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
-  ${_ME} show <id> [--account <account>] [--folder <folder>]
+  ${_ME} show (<id> | <name>) [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
   ${_ME} update <id> (--body <body> | --name <name>) [--account <account>]
                    [--folder <folder>]
@@ -1539,7 +1539,7 @@ ${_script_footer}"
 
 desc "show" <<HEREDOC
 Usage:
-  ${_ME} show <id> [--account <account>] [--folder <folder>]
+  ${_ME} show (<id> | <name>) [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
 
 Options:
@@ -1560,7 +1560,7 @@ Available Properties:
   body
 
 Description:
-  Show a note.
+  Show a note idenitied by <id> or <name>.
 HEREDOC
 _show() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
@@ -1620,10 +1620,18 @@ _show() {
 
   if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
   then
+    _help "show"
     return 1
   fi
 
-  [[ -z "${_id:-}" ]] && return 1
+  if [[ -z "${_id:-}" ]]
+  then
+    _help "show"
+    return 1
+  elif [[ ! "${_id}" =~ ^[[:digit:]]+$ ]]
+  then # enclose name in quotes
+    _id="\"${_id}\""
+  fi
 
   local _script_footer=
   local _script_header=
@@ -1634,7 +1642,7 @@ tell application "Notes"
   tell account "${_account_name}"
     tell folder "${_folder_name}"
       tell note ${_id}
-        set noteId to get id"
+        set noteId to get id
         set noteContainer to get container
         set notePasswordProtected to get password protected
         set noteCreationDate to get creation date

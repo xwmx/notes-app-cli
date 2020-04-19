@@ -46,7 +46,7 @@ Usage:
   notes-app folders show <id> [--account <account>] [--properties <prop1>,<prop2>]
   notes-app list [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
-  notes-app show <id> [--account <account>] [--folder <folder>]
+  notes-app show (<id> | <name>) [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
   notes-app update <id> (--body <body> | --name <name>) [--account <account>]
                    [--folder <folder>]
@@ -167,7 +167,7 @@ Description:
 
 ```text
 Usage:
-  notes-app show <id> [--account <account>] [--folder <folder>]
+  notes-app show (<id> | <name>) [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
 
 Options:
@@ -188,7 +188,7 @@ Available Properties:
   body
 
 Description:
-  Show a note.
+  Show a note idenitied by <id> or <name>.
 ```
 
 #### `update`
