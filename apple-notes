@@ -44,6 +44,11 @@ _ME="$(basename "${0}")"
 # Set to the program's full path.
 _MY_PATH="$(cd "$(dirname "$0")"; pwd)/$(basename "${0}")"
 
+# $_MY_PROJECT_NAME
+#
+# Set to the program's project name.
+_MY_PROJECT_NAME="apple-notes-cli"
+
 # $_MY_GITHUB_REPO
 #
 # Set to the program's primary GitHub repository URL.
@@ -207,6 +212,9 @@ trap _my_cleanup_on_exit EXIT
 ###############################################################################
 # Configuration
 ###############################################################################
+
+# `$_MY_DEFAULT_FOLDER_NAME`
+export _MY_DEFAULT_FOLDER_NAME="${_MY_DEFAULT_FOLDER_NAME:-${_MY_PROJECT_NAME}}"
 
 # `$_MY_HIGHLIGHT_COLOR`
 #
@@ -650,31 +658,61 @@ _alias_subcommand "help" "h"
 
 # add #########################################################################
 
-# apple #######################################################################
-
-desc "apple" <<HEREDOC
+desc "add" <<HEREDOC
 Usage:
-  ${_ME} apple
+  ${_ME} add --body <body> --name <name> [--folder <name>]
 HEREDOC
-_apple() {
-  # Paths:
-  #   # local notes:
-  #   ~/Library/Group Containers/group.com.apple.notes/
-  #   # icloud notes:
-  #   ~/Library/Containers/com.apple.Notes/
-  #
-  #   Other possible icloud notes
-  #   ~/Library/Containers/com.apple.Notes/Data/CloudKit/
-  #   ~/Library/Containers/com.apple.Notes/Data/Library/Notes/
-  #
-  # More info: https://osxdaily.com/2020/01/15/where-notes-stored-locally-mac/
+_add() {
+  local _body=
+  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _name=
+  local _script=
 
-  local _local_notes_dir="${HOME}/Library/Group Containers/group.com.apple.notes"
-  local _local_notes_db="${_local_notes_dir}/NoteStore.sqlite"
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
 
-  sqlite3 "${_local_notes_db}" \
-    "select Z_PK, ZSNIPPET, ZTITLE1 from ZICCLOUDSYNCINGOBJECT;" ".exit" \
-    | less
+    case "${_arg}" in
+      --body)
+        _body="${_val:-}"
+        shift
+        ;;
+      --folder)
+        _folder_name="${_val:-}"
+        shift
+        ;;
+      --name)
+        _name="${_val:-}"
+        shift
+        ;;
+      *)
+        :
+        ;;
+    esac
+
+    shift
+  done
+
+  if [[ -z "${_body:-}" ]] || [[ -z "${_name:-}" ]]
+  then
+    return 1
+  fi
+
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    return 1
+  fi
+
+  read -r -d '' _script <<HEREDOC || true
+tell application "Notes"
+    tell account "iCloud"
+        make new note at folder "${_folder_name}" with properties {name:"${_name}", body:"${_body}"}
+    end tell
+end tell
+HEREDOC
+
+  osascript -e "${_script}"
 }
 
 # commands ####################################################################
@@ -933,7 +971,107 @@ HEREDOC
   esac
 }
 
+# count #######################################################################
+
+desc "count" <<HEREDOC
+Usage:
+  ${_ME} count <folder name>
+
+Description:
+  Print the number of notes in <folder name>
+HEREDOC
+_count() {
+  local _folder_name="${1:-}"
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+  fi
+
+  local _script=
+  read -r -d '' _script <<HEREDOC || true
+tell application "Notes"
+  tell account "iCloud"
+    set myFolder to first folder whose name = "${_folder_name}"
+    get the count of notes of myFolder
+  end tell
+end tell
+HEREDOC
+
+  osascript -e "${_script}"
+}
+
 # delete ######################################################################
+
+desc "delete" <<HEREDOC
+Usage:
+  ${_ME} delete <id> [--folder <name>]
+HEREDOC
+_delete() {
+  local _folder_name=
+  local _force=0
+  local _id=
+  local _script=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --folder)
+        _folder_name="${_val:-}"
+        shift
+        ;;
+      -f|--force)
+        _force=1
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  [[ -z "${_id:-}" ]] && return 1
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+  fi
+
+  if ! ((_force))
+  then
+    printf "Deleting '%s' in folder '%s'\\n" "${_id}" "${_folder_name}"
+    while true
+    do
+      read -r -p "Are you sure you want to proceed? [y/N] " __yn
+      case ${__yn} in
+        [Yy]*)
+          break
+          ;;
+        *)
+          printf "Exiting...\\n"
+          exit 0
+          ;;
+      esac
+    done
+  fi
+
+  read -r -d '' _script <<HEREDOC || true
+tell application "Notes"
+  tell account "iCloud"
+    tell folder "${_folder_name}"
+      delete note ${_id}
+    end tell
+  end tell
+end tell
+HEREDOC
+
+  osascript -e "${_script}"
+}
 
 # edit ########################################################################
 
@@ -954,6 +1092,287 @@ _env() {
 }
 
 # list ########################################################################
+
+desc "list" <<HEREDOC
+Usage:
+  ${_ME} list <folder name>
+HEREDOC
+_list() {
+  local _folder_name="${1:-}"
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+  fi
+  local _script=
+
+  read -r -d '' _script <<HEREDOC || true
+tell application "Notes"
+  tell account "iCloud"
+    set myFolder to first folder whose name = "${_folder_name}"
+    set myNotes to notes of myFolder
+    set myCounter to 0
+
+    repeat with theNote in myNotes
+      tell theNote
+        set myCounter to myCounter + 1
+        set noteContainer to get container
+        set noteId to get id
+        set notePasswordProtected to get password protected
+        set noteCreationDate to get creation date
+        set noteModificationDate to get modification date
+        set noteName to get name
+        set noteBody to get body
+
+        log myCounter
+        log noteContainer
+        log noteId
+        log notePasswordProtected
+        log noteCreationDate
+        log noteModificationDate
+        log noteName
+        log noteBody
+      end tell
+    end repeat
+  end tell
+end tell
+HEREDOC
+
+  osascript -e "${_script}"
+}
+
+# show ########################################################################
+
+desc "show" <<HEREDOC
+Usage:
+  ${_ME} show <id> [--folder <name>] [--properties <prop1>,<prop2>]
+
+Options:
+  --properties  A comma-separated list of property names for the note.
+                Set to 'all' to include all properties.
+
+                Available Properties:
+                  noteId
+                  noteContainer
+                  notePasswordProtected
+                  noteCreationDate
+                  noteModificationDate
+                  noteName
+                  noteBody
+HEREDOC
+_show() {
+  local _folder_name=
+  local _id=
+  local _properties=
+  local _script=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --folder)
+        _folder_name="${_val:-}"
+        shift
+        ;;
+      --properties)
+        if [[ -n "${_val:-}" ]] && [[ ! "${_val:-}" =~ ^- ]]
+        then
+          _properties="$(printf "%s\\n" "${_val}" | tr ',' ' ')"
+        else
+          return 1
+        fi
+        shift
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  _debug printf "\${_properties}: %s\\n" "${_properties[*]:-}"
+
+  [[ -z "${_id:-}" ]] && return 1
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+  fi
+
+  local _script_footer=
+  local _script_header=
+  local _script_name=
+  local -a _script_properties=()
+
+  read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  tell account "iCloud"
+    tell folder "${_folder_name}"
+      tell note ${_id}
+HEREDOC
+  if [[ "${_properties}" =~ noteId|^all$ ]]
+  then
+    _script_properties+=("set noteId to get id")
+    _script_properties+=("log noteId")
+  fi
+
+  if [[ "${_properties}" =~ noteContainer|^all$ ]]
+  then
+    _script_properties+=("set noteContainer to get container")
+    _script_properties+=("log noteContainer")
+  fi
+
+  if [[ "${_properties}" =~ notePasswordProtected|^all$ ]]
+  then
+    _script_properties+=("set notePasswordProtected to get password protected")
+    _script_properties+=("log notePasswordProtected")
+  fi
+
+  if [[ "${_properties}" =~ noteCreationDate|^all$ ]]
+  then
+    _script_properties+=("set noteCreationDate to get creation date")
+    _script_properties+=("log noteCreationDate")
+  fi
+
+  if [[ "${_properties}" =~ noteModificationDate|^all$ ]]
+  then
+    _script_properties+=("set noteModificationDate to get modification date")
+    _script_properties+=("log noteModificationDate")
+  fi
+
+  if [[ "${_properties}" =~ noteName|^all$ ]]
+  then
+    _script_properties+=("set noteName to get name")
+    _script_properties+=("log noteName")
+  fi
+
+  if [[ "${_properties}" =~ noteBody|^all$ ]]
+  then
+    _script_properties+=("set noteBody to get body")
+    _script_properties+=("log noteBody")
+  fi
+
+  if [[ -z "${_script_properties[*]:-}" ]]
+  then
+    _script_properties+=("set noteId to get id")
+    _script_properties+=("log noteId")
+  fi
+
+  read -r -d '' _script_footer <<HEREDOC || true
+      end tell
+    end tell
+  end tell
+end tell
+HEREDOC
+
+local _script="\
+${_script_header}
+${_script_properties[*]:-}
+${_script_footer}"
+
+  _debug printf "\${_script}: %s\\n" "${_script}"
+
+  osascript -e "${_script}"
+}
+
+# update ######################################################################
+
+desc "update" <<HEREDOC
+Usage:
+  ${_ME} update <id> [--folder <name>] (--body <body> | --name <name>)
+HEREDOC
+_update() {
+  local _body=
+  local _folder_name=
+  local _id=
+  local _name=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --body)
+        _body="${_val:-}"
+        shift
+        ;;
+      --folder)
+        _folder_name="${_val:-}"
+        shift
+        ;;
+      --name)
+        _name="${_val:-}"
+        shift
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  if [[ -z "${_id:-}" ]]
+  then
+    return 1
+  fi
+
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+  fi
+
+  if [[ -z "${_body:-}" ]] && [[ -z "${_name:-}" ]]
+  then
+    return 1
+  fi
+
+  local _script_header=
+  local _script_body=
+  local _script_name=
+  local _script_footer=
+
+  read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  tell account "iCloud"
+    tell folder "${_folder_name}"
+      tell note ${_id}
+HEREDOC
+  if [[ -n "${_body:-}" ]]
+  then
+    _script_body="          set the body of it to \"${_body}\""
+  fi
+
+  if [[ -n "${_name:-}" ]]
+  then
+    _script_name="          set the name of it to \"${_name}\""
+  fi
+  read -r -d '' _script_footer <<HEREDOC || true
+      end tell
+    end tell
+  end tell
+end tell
+HEREDOC
+
+local _script="\
+${_script_header}
+${_script_body}
+${_script_name}
+${_script_footer}"
+
+  _debug printf "\${_script}: %s\\n" "${_script}"
+
+  osascript -e "${_script}" &&
+    printf "Updated Note.\\n"
+}
 
 # version ####################################################################
 
@@ -1087,17 +1506,20 @@ _USE_DEBUG=0
 
 # Initialize additional expected option variables.
 _SUBCOMMAND=
-_SCOPE=
-_SCOPED=0
 _ARGUMENTS=()
 
 # $_SUBCOMMANDS
 #
 # All available subcommands.
 _SUBCOMMANDS=(
-  apple
+  add
   completions
+  count
+  delete
   env
+  list
+  show
+  update
   version
 )
 
@@ -1112,7 +1534,7 @@ _SUBCOMMANDS=(
 # https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
 _SUBCOMMANDS_PATTERN="@($(_join '|' "${_SUBCOMMANDS[@]}"))"
 
-_debug printf "\${_SUBCOMMANDS_PATTERN}: %s\\n" "${_SUBCOMMANDS_PATTERN}"
+
 
 # _is_valid_subcommand()
 #
