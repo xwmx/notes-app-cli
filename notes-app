@@ -225,6 +225,9 @@ trap _my_cleanup_on_exit EXIT
 # Configuration
 ###############################################################################
 
+# `$_MY_DEFAULT_ACCOUNT_NAME`
+export _MY_DEFAULT_ACCOUNT_NAME="${_MY_DEFAULT_ACCOUNT_NAME:-iCloud}"
+
 # `$_MY_DEFAULT_FOLDER_NAME`
 export _MY_DEFAULT_FOLDER_NAME="${_MY_DEFAULT_FOLDER_NAME:-${_MY_PROJECT_NAME}}"
 
@@ -706,6 +709,7 @@ Description:
   Add a new note.
 HEREDOC
 _add() {
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
   local _body=
   local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
   local _name=
@@ -718,17 +722,45 @@ _add() {
     local _val="${2:-}"
 
     case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "add"
+          return 1
+        fi
+        ;;
       --body)
-        _body="${_val:-}"
-        shift
+        if __option_value_is_present "${_val:-}"
+        then
+          _body="${_val}"
+          shift
+        else
+          _help "add"
+          return 1
+        fi
         ;;
       --folder)
-        _folder_name="${_val:-}"
-        shift
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "add"
+          return 1
+        fi
         ;;
       --name)
-        _name="${_val:-}"
-        shift
+        if __option_value_is_present "${_val:-}"
+        then
+          _name="${_val}"
+          shift
+        else
+          _help "add"
+          return 1
+        fi
         ;;
       *)
         :
@@ -738,7 +770,7 @@ _add() {
     shift
   done
 
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
   then
     return 1
   fi
@@ -756,7 +788,7 @@ _add() {
 
   read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
-    tell account "iCloud"
+    tell account "${_account_name}"
         make new note at folder "${_folder_name}" with properties ${_properties}
     end tell
 end tell
@@ -1066,7 +1098,8 @@ Description:
   Delete note <id>.
 HEREDOC
 _delete() {
-  local _folder_name=
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
   local _force=0
   local _id=
   local _script=
@@ -1077,9 +1110,25 @@ _delete() {
     local _val="${2:-}"
 
     case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "delete"
+          return 1
+        fi
+        ;;
       --folder)
-        _folder_name="${_val:-}"
-        shift
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "delete"
+          return 1
+        fi
         ;;
       -f|--force)
         _force=1
@@ -1095,11 +1144,12 @@ _delete() {
     shift
   done
 
-  [[ -z "${_id:-}" ]] && return 1
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
   then
-    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+    return 1
   fi
+
+  [[ -z "${_id:-}" ]] && return 1
 
   if ! ((_force))
   then
@@ -1121,7 +1171,7 @@ _delete() {
 
   read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
-  tell account "iCloud"
+  tell account "${_account_name}"
     tell folder "${_folder_name}"
       delete note ${_id}
     end tell
@@ -1165,11 +1215,53 @@ Description:
   List folders in an account.
 HEREDOC
 _folders() {
-  local _account_name="${1:-iCloud}"
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _properties=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "folders"
+          return 1
+        fi
+        ;;
+      --properties)
+        if [[ -n "${_val:-}" ]] && [[ ! "${_val:-}" =~ ^- ]]
+        then
+          _properties="$(printf "%s\\n" "${_val}" | tr ',' ' ')"
+        else
+          _help "folders"
+          return 1
+        fi
+        shift
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  _debug printf "\${_properties}: %s\\n" "${_properties[*]:-}"
+
   if [[ -z "${_account_name:-}" ]]
   then
     return 1
   fi
+
   local _script=
 
   read -r -d '' _script <<HEREDOC || true
@@ -1207,14 +1299,17 @@ Description:
   List notes.
 HEREDOC
 _list() {
+  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+
   if [[ "${1:-}" == "--folder" ]]
   then
-    local _folder_name="${2:-}"
+    _folder_name="${2:-}"
   fi
 
   if [[ -z "${_folder_name:-}" ]]
   then
-    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+    _help "list"
+    return 1
   fi
 
   local _script=
@@ -1282,7 +1377,8 @@ Description:
   Show a note.
 HEREDOC
 _show() {
-  local _folder_name=
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
   local _id=
   local _properties=
   local _script=
@@ -1293,15 +1389,32 @@ _show() {
     local _val="${2:-}"
 
     case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "show"
+          return 1
+        fi
+        ;;
       --folder)
-        _folder_name="${_val:-}"
-        shift
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "show"
+          return 1
+        fi
         ;;
       --properties)
         if [[ -n "${_val:-}" ]] && [[ ! "${_val:-}" =~ ^- ]]
         then
           _properties="$(printf "%s\\n" "${_val}" | tr ',' ' ')"
         else
+          _help "show"
           return 1
         fi
         shift
@@ -1319,11 +1432,12 @@ _show() {
 
   _debug printf "\${_properties}: %s\\n" "${_properties[*]:-}"
 
-  [[ -z "${_id:-}" ]] && return 1
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
   then
-    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+    return 1
   fi
+
+  [[ -z "${_id:-}" ]] && return 1
 
   local _script_footer=
   local _script_header=
@@ -1418,8 +1532,9 @@ Description:
   Update a note.
 HEREDOC
 _update() {
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
   local _body=
-  local _folder_name=
+  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
   local _id=
   local _name=
 
@@ -1429,17 +1544,45 @@ _update() {
     local _val="${2:-}"
 
     case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "update"
+          return 1
+        fi
+        ;;
       --body)
-        _body="${_val:-}"
-        shift
+        if __option_value_is_present "${_val:-}"
+        then
+          _body="${_val}"
+          shift
+        else
+          _help "update"
+          return 1
+        fi
         ;;
       --folder)
-        _folder_name="${_val:-}"
-        shift
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "update"
+          return 1
+        fi
         ;;
       --name)
-        _name="${_val:-}"
-        shift
+        if __option_value_is_present "${_val:-}"
+        then
+          _name="${_val}"
+          shift
+        else
+          _help "update"
+          return 1
+        fi
         ;;
       *)
         if [[ -z "${_id:-}" ]]
@@ -1457,9 +1600,9 @@ _update() {
     return 1
   fi
 
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
   then
-    _folder_name="${_MY_DEFAULT_FOLDER_NAME}"
+    return 1
   fi
 
   if [[ -z "${_body:-}" ]] && [[ -z "${_name:-}" ]]
@@ -1474,7 +1617,7 @@ _update() {
 
   read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  tell account "iCloud"
+  tell account "${_account_name}"
     tell folder "${_folder_name}"
       tell note ${_id}
 HEREDOC
