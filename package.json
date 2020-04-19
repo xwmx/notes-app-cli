@@ -1,6 +1,6 @@
 {
   "name": "notes-app-cli",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha",
   "description": "",
   "main": "index.js",
   "directories": {
