@@ -702,9 +702,8 @@ Usage:
   ${_ME} commands
   ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <id> [--account <account>] [--folder <folder>]
-  ${_ME} folders
-  ${_ME} folders show <id> [--account <account>] [--folder <folder>]
-                         [--properties <prop1>,<prop2>]
+  ${_ME} folders [show <id>] [--account <account>] [--folder <folder>]
+                    [--properties <prop1>,<prop2>]
   ${_ME} list [--account <account>] [--folder <folder>]
                  [--properties <prop1>,<prop2>]
   ${_ME} show (<id> | <name> | <number>) [--account <account>]
@@ -1295,9 +1294,8 @@ _env() {
 
 desc "folders" <<HEREDOC
 Usage:
-  ${_ME} folders
-  ${_ME} folders show <id> [--account <account>] [--folder <folder>]
-                         [--properties <prop1>,<prop2>]
+  ${_ME} folders [show <id>] [--account <account>] [--folder <folder>]
+                    [--properties <prop1>,<prop2>]
 
 Options:
   --account    <account>        The account containing the folder.
