@@ -1219,10 +1219,7 @@ _count() {
     shift
   done
 
-  if [[ -z "${_account_name:-}" ]] || [[ -z "${_folder_name:-}" ]]
-  then
-    return 1
-  elif [[ -n "${_folder_name:-}" ]] &&
+  if [[ -n "${_folder_name:-}" ]] &&
     ! _validate_account_contains_folder "${_account_name}" "${_folder_name}"
   then
     printf "Account '%s' does not contain folder '%s'.\\n" \
@@ -1230,11 +1227,27 @@ _count() {
     return 1
   fi
 
+  if [[ -z "${_account_name:-}" ]]
+  then
+    _help "count"
+    return 1
+  else
+    _account_name="$(_get_id_selector "${_account_name}")"
+  fi
+
+  if [[ -z "${_folder_name:-}" ]]
+  then
+    _help "count"
+    return 1
+  else
+    _folder_name="$(_get_id_selector "${_folder_name}")"
+  fi
+
   local _script=
   read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
-  tell account "${_account_name}"
-    set myFolder to first folder whose name = "${_folder_name}"
+  tell account ${_account_name}
+    set myFolder to folder ${_folder_name}
     get the count of notes of myFolder
   end tell
 end tell
