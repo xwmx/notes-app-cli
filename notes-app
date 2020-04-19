@@ -1455,7 +1455,7 @@ _list() {
 
   read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
-  tell account "iCloud"
+  tell account "${_account_name}"
     set myFolder to first folder whose name = "${_folder_name}"
     set myNotes to notes of myFolder
     set myCounter to 0
