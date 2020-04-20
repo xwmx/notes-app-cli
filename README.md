@@ -141,6 +141,10 @@ Available Properties:
   container
   name
 
+Subcommands:
+  (default)  List folders in the current account or folder.
+  show       Show properties of <folder>.
+
 Description:
   List folders in an account.
 ```

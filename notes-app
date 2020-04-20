@@ -1086,7 +1086,7 @@ _delete() {
 
   if [[ -z "${_account_name:-}" ]]
   then
-    _help "show"
+    _help "delete"
     return 1
   else
     _account_name="$(_get_id_selector "${_account_name}")"
@@ -1094,7 +1094,7 @@ _delete() {
 
   if [[ -z "${_folder_name:-}" ]]
   then
-    _help "show"
+    _help "delete"
     return 1
   else
     _folder_name="$(_get_id_selector "${_folder_name}")"
@@ -1102,7 +1102,7 @@ _delete() {
 
   if [[ -z "${_id:-}" ]]
   then
-    _help "show"
+    _help "delete"
     return 1
   else
     _id="$(_get_id_selector "${_id}")"
@@ -1184,13 +1184,19 @@ Available Properties:
   container
   name
 
+Subcommands:
+  (default)  List folders in the current account or folder.
+  show       Show properties of <folder>.
+
 Description:
   List folders in an account.
 HEREDOC
 _folders() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
-  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _folder_name=
+  local _id=
   local _properties=
+  local _subcommand="list"
 
   while ((${#}))
   do
@@ -1228,6 +1234,12 @@ _folders() {
         fi
         shift
         ;;
+      show)
+        if [[ "${_subcommand:-}" == "list" ]]
+        then
+          _subcommand="show"
+        fi
+        ;;
       *)
         if [[ -z "${_id:-}" ]]
         then
@@ -1240,6 +1252,7 @@ _folders() {
   done
 
   _debug printf "\${_properties}: %s\\n" "${_properties[*]:-}"
+  _debug printf "\${_subcommand}: %s\\n" "${_subcommand:-}"
 
   if [[ -z "${_account_name:-}" ]]
   then
@@ -1249,11 +1262,8 @@ _folders() {
     _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -n "${_folder_name:-}" ]]
   then
-    _help "folders"
-    return 1
-  else
     _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
@@ -1263,9 +1273,12 @@ _folders() {
   local _script_header=
   local -a _script_properties=()
 
-  if [[ -z "${_folder_name}" ]]
+  if [[ "${_subcommand}" == "list" ]]
   then
-    read -r -d '' _script_header <<HEREDOC || true
+
+    if [[ -z "${_folder_name}" ]]
+    then
+      read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   set myAccount to account ${_account_name}
   tell myAccount
@@ -1282,14 +1295,14 @@ tell application "Notes"
         -- log myCounter
 HEREDOC
 
-    read -r -d '' _script_footer <<HEREDOC || true
+      read -r -d '' _script_footer <<HEREDOC || true
       end tell
     end repeat
   end tell
 end tell
 HEREDOC
-  else
-    read -r -d '' _script_header <<HEREDOC || true
+    else
+      read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   set myAccount to account ${_account_name}
   tell myAccount
@@ -1308,36 +1321,107 @@ tell application "Notes"
           -- log myCounter
 HEREDOC
 
-    read -r -d '' _script_footer <<HEREDOC || true
+      read -r -d '' _script_footer <<HEREDOC || true
         end tell
       end repeat
     end tell
   end tell
 end tell
 HEREDOC
-  fi
+    fi
 
-  if [[ "${_properties}" =~ container|^all$ ]]
+    if [[ "${_properties}" =~ container|^all$ ]]
+    then
+      _script_properties+=("log folderContainer")
+    fi
+
+    if [[ "${_properties}" =~ id|^all$ ]]
+    then
+      _script_properties+=("log folderId")
+    fi
+
+    if [[ "${_properties}" =~ name|^all$ ]]
+    then
+      _script_properties+=("log folderName")
+    fi
+
+    if [[ -z "${_script_properties[*]:-}" ]]
+    then # no properties were specified
+      _script_properties+=("log folderName")
+    fi
+
+    local _script="\
+${_script_header}
+${_script_properties[*]:-}
+${_script_footer}"
+
+  elif [[ "${_subcommand}" == "show" ]]
   then
-    _script_properties+=("log folderContainer")
+    if [[ -z "${_id:-}" ]]
+    then
+      _help "show"
+      return 1
+    else
+      _id="$(_get_id_selector "${_id}")"
+    fi
+
+    if [[ -z "${_properties:-}" ]]
+    then # no properties were specified
+      _properties="all"
+    fi
+
+    if [[ -n "${_folder_name}" ]]
+    then
+      read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  tell account ${_account_name}
+    tell folder ${_folder_name}
+      tell folder ${_id}
+        set folderContainer to get container
+        set folderId to get id
+        set folderName to get name
+HEREDOC
+
+      read -r -d '' _script_footer <<HEREDOC || true
+      end tell
+    end tell
+  end tell
+end tell
+HEREDOC
+    else
+      read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  tell account ${_account_name}
+    tell folder ${_id}
+      set folderContainer to get container
+      set folderId to get id
+      set folderName to get name
+HEREDOC
+
+      read -r -d '' _script_footer <<HEREDOC || true
+    end tell
+  end tell
+end tell
+HEREDOC
+    fi
+
+    if [[ "${_properties}" =~ container|^all$ ]]
+    then
+      _script_properties+=("log folderContainer")
+    fi
+
+    if [[ "${_properties}" =~ id|^all$ ]]
+    then
+      _script_properties+=("log folderId")
+    fi
+
+    if [[ "${_properties}" =~ name|^all$ ]]
+    then
+      _script_properties+=("log folderName")
+    fi
   fi
 
-  if [[ "${_properties}" =~ id|^all$ ]]
-  then
-    _script_properties+=("log folderId")
-  fi
-
-  if [[ "${_properties}" =~ name|^all$ ]]
-  then
-    _script_properties+=("log folderName")
-  fi
-
-  if [[ -z "${_script_properties[*]:-}" ]]
-  then # no properties were specified
-    _script_properties+=("log folderName")
-  fi
-
-local _script="\
+  _script="\
 ${_script_header}
 ${_script_properties[*]:-}
 ${_script_footer}"
