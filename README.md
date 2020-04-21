@@ -39,6 +39,7 @@ Notes.app CLI
 A command line interface for Notes.app on macOS.
 
 Usage:
+  notes-app accounts [show <account>] [--properties <prop1>,<prop2>]
   notes-app add [<name>] [--account <account>] [--body <body>] [--folder <folder>]
   notes-app commands
   notes-app count [--account <account>] [--folder <folder>]
@@ -63,6 +64,36 @@ More Information:
 ```
 
 ### Subcommands
+
+#### `accounts`
+
+```text
+Usage:
+  notes-app accounts [show <account>] [--properties <prop1>,<prop2>]
+
+Options:
+  --properties <prop1>,<prop2>  A comma-separated list of property names to
+                                include in the output. Set to 'all' to include
+                                all properties.
+
+Identifiers:
+  <account> can be identified with one of the following:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
+Available Properties:
+  all
+  id
+  name
+
+Subcommands:
+  (default)  List all accounts.
+  show       Show properties of <account>.
+
+Description:
+  List accounts or show an account.
+```
 
 #### `add`
 
@@ -282,7 +313,7 @@ Options:
   --name    <name>     The new value for the note name.
 
 Identifiers:
-  <notes>, <account>, and <folder> can be identified with one of the following:
+  <note>, <account>, and <folder> can be identified with one of the following:
     id      The Notes.app core data id (starts with 'x-coredata://').
     name    The name property.
     number  The current sequence number.
