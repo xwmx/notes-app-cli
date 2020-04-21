@@ -1885,6 +1885,11 @@ _export() {
 
     if ((_include_attachments))
     then
+      # NOTE: Saving the attachment via AppleScript silently fails. This
+      # appears to be related to iCloud. More info:
+      # https://forum.latenightsw.com/t/exporting-apple-notes-attachments/766/5
+      # See git history (e.g., use `git blame` on this message) for an
+      # AppleScript implementation.
       local _attachments_path="${_target_path}/${_note_id_truncated}"
       if [[ ! -e "${_attachments_path}" ]]
       then
@@ -1895,12 +1900,6 @@ _export() {
         return 1
       fi
 
-      # local _account_name_selector=
-      # _account_name_selector="$(_get_id_selector "${_account_name:-}")"
-
-      # local _note_id_selector=
-      # _note_id_selector="$(_get_id_selector "${_note_id}")"
-
       local -a _attachment_ids_and_names=
       _attachment_ids_and_names=($(_attachments "${_note_id}" --properties id,name))
 
@@ -1910,9 +1909,6 @@ _export() {
       do
         # local _attachment_id="${_attachment_ids_and_names[0]:-}"
         local _attachment_name="${_attachment_ids_and_names[1]:-}"
-
-        # local _attachment_id_selector=
-        # _attachment_id_selector="$(_get_id_selector "${_attachment_id}")"
 
         local _attachment_target_path="${_attachments_path}/${_attachment_name}"
 
@@ -1927,25 +1923,6 @@ _export() {
           cp "${_attachment_path}" "${_attachment_target_path}" &&
             printf "Exported attachment to %s\\n" "${_attachment_target_path}"
         fi
-
-        # TODO: Saving the attachment via AppleScript silently fails. This
-        # appears to be related to iCloud. More info:
-        # https://forum.latenightsw.com/t/exporting-apple-notes-attachments/766/5
-#         read -r -d '' _script <<HEREDOC || true
-# tell application "Notes"
-#   tell account ${_account_name_selector}
-#     tell folder "Notes"
-#       tell note ${_note_id_selector}
-#         set myAttachment to attachment ${_attachment_id_selector}
-#         set targetPath to POSIX file "${_target_path}"
-#         save myAttachment in targetPath
-#       end tell
-#     end tell
-#   end tell
-# end tell
-# HEREDOC
-        # _debug printf "\${_script}: %s\\n" "${_script}"
-        # osascript -e "${_script}" 2>&1
 
         _counter=$((_counter+2))
       done
