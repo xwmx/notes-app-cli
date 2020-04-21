@@ -767,8 +767,8 @@ Usage:
   ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <note> [--account <account>] [--folder <folder>]
   ${_ME} edit <note> [--account <account>] [--folder <folder>]
-  ${_ME} export <path> [--account <account>] [--folder <folder>]
-                   [--note <note>]
+  ${_ME} export <path> [--account <account>] [--attachments]
+                   [--folder <folder>] [--note <note>]
   ${_ME} folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
   ${_ME} list [--account <account>] [--folder <folder>]
@@ -1002,10 +1002,8 @@ Description:
 
 Note Format:
   The format of each note provided by Notes.app consists of:
-
     Line  1:     An unformatted string representing the "Name" property.
     Lines 2-end: An HTML formatted body.
-
   Within Notes.app the first line can be formatted, but this formatting is not
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
@@ -1578,10 +1576,8 @@ Description:
 
 Note Format:
   The format of each note provided by Notes.app consists of:
-
     Line  1:     An unformatted string representing the "Name" property.
     Lines 2-end: An HTML formatted body.
-
   Within Notes.app the first line can be formatted, but this formatting is not
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
@@ -1723,11 +1719,12 @@ _env() {
 
 desc "export" <<HEREDOC
 Usage:
-  ${_ME} export <path> [--account <account>] [--folder <folder>]
-                   [--note <note>]
+  ${_ME} export <path> [--account <account>] [--attachments]
+                   [--folder <folder>] [--note <note>]
 
 Options:
   --account    <account>  The account containing the note.
+  --attachments           Export attachments with notes.
   --folder     <folder>   The folder containing the note.
   --note       <note>     A note to export.
 
@@ -1742,16 +1739,23 @@ Description:
   default account ($_MY_DEFAULT_ACCOUNT_NAME) are exported. Use --account,
   --folder, and --note flags to reduce the scope.
 
-Limitations:
-  - Attachments are not supported.
-  - Some formatting is lost.
+Note Format:
+  The format of each note provided by Notes.app consists of:
+    Line  1:     An unformatted string representing the "Name" property.
+    Lines 2-end: An HTML formatted body.
+  Within Notes.app the first line can be formatted, but this formatting is not
+  preserved when the note is retrieved or set via AppleScript, so any
+  formatting in this line will likely be lost or inconsistent with what's
+  displayed in Notes.app.
 HEREDOC
 _export() {
   local _account_name=
   local _include_attachments=0
   local _folder_name=
   local _id=
+  local _macos_attachments_path="${HOME}/Library/Group Containers/group.com.apple.notes/Media"
   local _open_in_app=0
+  local _note_name=
   local _properties=
   local _script=
   local _target_path=
@@ -1838,16 +1842,17 @@ _export() {
     _context_arguments+=("--folder" "${_folder_name}")
   fi
 
-  printf \
-    "Exporting %s items. This might take a while...\\n" \
-    "$(_count "${_context_arguments[@]:-}")"
-
   local _note_id_list=()
 
   if [[ -z "${_note_name:-}" ]]
   then
+    printf \
+      "Exporting %s items. This might take a while...\\n" \
+      "$(_count "${_context_arguments[@]:-}")"
     _note_id_list=($(_list "${_context_arguments[@]:-}" --properties id))
   else
+    printf \
+      "Exporting 1 item. Please wait...\\n"
     _note_id_list=($(_show "${_note_name}" "${_context_arguments[@]:-}" --properties id))
   fi
 
@@ -1890,46 +1895,57 @@ _export() {
         return 1
       fi
 
-      local _account_name_selector=
-      _account_name_selector="$(_get_id_selector "${_account_name:-}")"
+      # local _account_name_selector=
+      # _account_name_selector="$(_get_id_selector "${_account_name:-}")"
 
-      local _note_id_selector=
-      _note_id_selector="$(_get_id_selector "${_note_id}")"
+      # local _note_id_selector=
+      # _note_id_selector="$(_get_id_selector "${_note_id}")"
 
       local -a _attachment_ids_and_names=
       _attachment_ids_and_names=($(_attachments "${_note_id}" --properties id,name))
 
       local _counter=0
+
       while [[ "${_counter}" -lt "${#_attachment_ids_and_names[@]:-}" ]]
       do
-        local _attachment_id="${_attachment_ids_and_names[0]:-}"
+        # local _attachment_id="${_attachment_ids_and_names[0]:-}"
         local _attachment_name="${_attachment_ids_and_names[1]:-}"
 
-        local _attachment_id_selector=
-        _attachment_id_selector="$(_get_id_selector "${_attachment_id}")"
+        # local _attachment_id_selector=
+        # _attachment_id_selector="$(_get_id_selector "${_attachment_id}")"
 
-        local _target_path="${_attachments_path}/${_attachment_name}"
+        local _attachment_target_path="${_attachments_path}/${_attachment_name}"
+
+        local _attachment_path
+        local _attachment_path="$(
+          find "${_macos_attachments_path}" -name "${_attachment_name}" \
+            | head -n 1
+        )"
+
+        if [[ -f "${_attachment_path:-}" ]]
+        then
+          cp "${_attachment_path}" "${_attachment_target_path}" &&
+            printf "Exported attachment to %s\\n" "${_attachment_target_path}"
+        fi
 
         # TODO: Saving the attachment silently fails. This appears to be
         # related to iCloud. More info:
         # https://forum.latenightsw.com/t/exporting-apple-notes-attachments/766/5
-        read -r -d '' _script <<HEREDOC || true
-tell application "Notes"
-  tell account ${_account_name_selector}
-    tell folder "Notes"
-      tell note ${_note_id_selector}
-        set myAttachment to attachment ${_attachment_id_selector}
-        set targetPath to POSIX file "${_target_path}"
-        save myAttachment in targetPath
-      end tell
-    end tell
-  end tell
-end tell
-HEREDOC
-
-        _debug printf "\${_script}: %s\\n" "${_script}"
-
-        osascript -e "${_script}" 2>&1
+#         read -r -d '' _script <<HEREDOC || true
+# tell application "Notes"
+#   tell account ${_account_name_selector}
+#     tell folder "Notes"
+#       tell note ${_note_id_selector}
+#         set myAttachment to attachment ${_attachment_id_selector}
+#         set targetPath to POSIX file "${_target_path}"
+#         save myAttachment in targetPath
+#       end tell
+#     end tell
+#   end tell
+# end tell
+# HEREDOC
+        # _debug printf "\${_script}: %s\\n" "${_script}"
+        # osascript -e "${_script}" 2>&1
 
         _counter=$((_counter+2))
       done
