@@ -2025,7 +2025,7 @@ Description:
 HEREDOC
 _show() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
-  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _folder_name=
   local _id=
   local _open_in_app=0
   local _properties=
@@ -2091,11 +2091,8 @@ _show() {
     _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -n "${_folder_name:-}" ]]
   then
-    _help "show"
-    return 1
-  else
     _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
@@ -2109,7 +2106,9 @@ _show() {
 
   if ((_open_in_app))
   then
-    read -r -d '' _script <<HEREDOC || true
+    if [[ -n "${_folder_name:-}" ]]
+    then
+      read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
   tell account ${_account_name}
     tell folder ${_folder_name}
@@ -2118,6 +2117,15 @@ tell application "Notes"
   end tell
 end tell
 HEREDOC
+    else
+      read -r -d '' _script <<HEREDOC || true
+tell application "Notes"
+  tell account ${_account_name}
+    show note ${_id}
+  end tell
+end tell
+HEREDOC
+    fi
   else
     local _script_footer=
     local _script_header=
@@ -2128,12 +2136,34 @@ HEREDOC
       _properties="all"
     fi
 
-    read -r -d '' _script_header <<HEREDOC || true
+    if [[ -n "${_folder_name:-}" ]]
+    then
+      read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   tell account ${_account_name}
     tell folder ${_folder_name}
       tell note ${_id}
 HEREDOC
+
+      read -r -d '' _script_footer <<HEREDOC || true
+      end tell
+    end tell
+  end tell
+end tell
+HEREDOC
+    else
+      read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  tell account ${_account_name}
+    tell note ${_id}
+HEREDOC
+
+      read -r -d '' _script_footer <<HEREDOC || true
+    end tell
+  end tell
+end tell
+HEREDOC
+    fi
 
     if [[ "${_properties}" =~ id|^all$ ]]
     then
@@ -2177,12 +2207,6 @@ HEREDOC
       _script_properties+=("log noteBody")
     fi
 
-    read -r -d '' _script_footer <<HEREDOC || true
-      end tell
-    end tell
-  end tell
-end tell
-HEREDOC
 
 _script="\
 ${_script_header}
