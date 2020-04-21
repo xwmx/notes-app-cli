@@ -1,15 +1,25 @@
 {
   "name": "notes-app-cli",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "",
-  "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "test": "bats test"
   },
+  "bin": {
+    "notes-app": "./notes-app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xwmx/notes-app-cli.git"
+  },
   "author": "William Melody",
   "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/xwmx/notes-app-cli/issues"
+  },
+  "homepage": "https://github.com/xwmx/notes-app-cli#readme",
   "dependencies": {}
 }
