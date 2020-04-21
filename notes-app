@@ -1814,7 +1814,7 @@ Description:
 HEREDOC
 _list() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
-  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _folder_name=
   local _properties=
 
   while ((${#}))
@@ -1874,19 +1874,27 @@ _list() {
     _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -n "${_folder_name:-}" ]]
   then
-    _help "list"
-    return 1
-  else
     _folder_name="$(_get_id_selector "${_folder_name}")"
+  fi
+
+  local _note_container=
+
+  if [[ -n "${_folder_name:-}" ]]
+  then
+    _note_container="${_folder_name}"
+  else
+    _note_container="${_account_name}"
   fi
 
   local _script_footer=
   local _script_header=
   local -a _script_properties=()
 
-  read -r -d '' _script_header <<HEREDOC || true
+  if [[ -n "${_folder_name:-}" ]]
+  then
+    read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   tell account ${_account_name}
     set myFolder to folder ${_folder_name}
@@ -1897,6 +1905,19 @@ tell application "Notes"
       tell theNote
         set myCounter to myCounter + 1
 HEREDOC
+  else
+    read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  set myAccount to account ${_account_name}
+  tell account ${_account_name}
+    set myNotes to notes of myAccount
+    set myCounter to 0
+
+    repeat with theNote in myNotes
+      tell theNote
+        set myCounter to myCounter + 1
+HEREDOC
+  fi
 
   if [[ "${_properties}" =~ counter|^all$ ]]
   then
