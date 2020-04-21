@@ -2,9 +2,6 @@
 
 A command line interface for Notes.app on macOS.
 
-`notes-app` uses AppleScript to interact with Notes.app to create,
-list, update, and delete notes.
-
 ## Quirks
 
 - Requires macOS.
@@ -113,6 +110,36 @@ Identifiers:
 
 Description:
   Delete <note>.
+```
+
+#### `edit`
+
+```text
+Usage:
+  notes-app edit <note> [--account <account>] [--folder <folder>]
+
+Options:
+  --account    <account>  The account containing the note.
+  --folder     <folder>   The folder containing the note.
+
+
+Identifiers:
+  <note>, <account>, and <folder> can be identified with one of the following:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
+Description:
+  Edit a note idenitied by <id>, <name>, or <number> in your terminal editor,
+  as set in the `$EDITOR` environment variable.
+
+  The format provided by Notes.app consists of:
+    Line  1:     An unformatted string representing the "Name" property.
+    Lines 2-end: An HTML formatted body.
+  Within Notes.app the first line can be formatted, but this formatting is not
+  preserved when the note is retrieved or set via AppleScript, so any
+  formatting in this line will likely be lost or inconsistent with what's
+  displayed in Notes.app.
 ```
 
 #### `folders`

@@ -92,6 +92,11 @@ else # macOS
   export _SED_I_COMMAND=(sed -i '')
 fi
 
+# $_NEWLINE
+#
+# Use ANSI-C quoted newline for string building.
+_NEWLINE=$'\n'
+
 ###############################################################################
 # .notes-apprc
 ###############################################################################
@@ -1141,6 +1146,152 @@ HEREDOC
 
 # edit ########################################################################
 
+desc "edit" <<HEREDOC
+Usage:
+  ${_ME} edit <note> [--account <account>] [--folder <folder>]
+
+Options:
+  --account    <account>  The account containing the note.
+  --folder     <folder>   The folder containing the note.
+
+
+Identifiers:
+  <note>, <account>, and <folder> can be identified with one of the following:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
+Description:
+  Edit a note idenitied by <id>, <name>, or <number> in your terminal editor,
+  as set in the \`\$EDITOR\` environment variable.
+
+  The format provided by Notes.app consists of:
+    Line  1:     An unformatted string representing the "Name" property.
+    Lines 2-end: An HTML formatted body.
+  Within Notes.app the first line can be formatted, but this formatting is not
+  preserved when the note is retrieved or set via AppleScript, so any
+  formatting in this line will likely be lost or inconsistent with what's
+  displayed in Notes.app.
+HEREDOC
+_edit() {
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _id=
+  local _markdown=0
+  local _open_in_app=0
+  local _properties=
+  local _script=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "edit"
+          return 1
+        fi
+        ;;
+      --folder)
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "edit"
+          return 1
+        fi
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  if [[ -z "${_id:-}" ]]
+  then
+    _help "show"
+    return 1
+  fi
+
+  local _show_arguments=("${_id}")
+
+  if [[ -n "${_account_name:-}" ]]
+  then
+    _show_arguments+=("${_account_name}")
+  fi
+
+  if [[ -n "${_folder_name:-}" ]]
+  then
+    _show_arguments+=("${_folder_name}")
+  fi
+
+  local _body=
+  local _name=
+  local _note_id=
+
+  local _temp_file
+  _temp_file="$(mktemp)"
+
+  while read -r __line
+  do
+    if [[ -z "${_note_id:-}" ]]
+    then
+      _note_id="${__line}"
+    elif [[ -z "${_name:-}" ]]
+    then
+      _name="${__line}"
+    else
+      _body+="${__line}${_NEWLINE}"
+    fi
+  done < <(_show "${_show_arguments[@]}" --properties id,name,body)
+
+  printf "%s\\n" "${_name}" >> "${_temp_file}"
+  printf "%s\\n" "${_body}"  >> "${_temp_file}"
+
+  _debug printf "%s\\n" "${_name}"
+  _debug printf "%s\\n" "${_body}"
+
+  _before="$(_get_hash "${_temp_file}")"
+  _edit_file "${_temp_file}"
+  _after="$(_get_hash "${_temp_file}")"
+
+  if [[ "${_before}" != "${_after}" ]]
+  then
+    local _html_body="${_body}"
+
+    _body=
+    _name=
+
+    while IFS= read -r __line
+    do
+      if [[ -z "${_name:-}" ]]
+      then
+        _name="${__line}"
+      else
+        _body+="${__line}${_NEWLINE}"
+      fi
+    done < "${_temp_file}"
+
+    _debug echo "---"
+    _debug printf "%s\\n" "${_name}"
+    _debug printf "%s\\n" "${_body}"
+
+    _update "${_note_id}" --name "${_name}" --body "${_body}"
+  fi
+}
+
 # env #########################################################################
 
 desc "env" <<HEREDOC
@@ -2116,6 +2267,7 @@ _SUBCOMMANDS=(
   commands
   count
   delete
+  edit
   env
   folders
   h
