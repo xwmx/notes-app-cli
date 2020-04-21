@@ -1917,7 +1917,7 @@ _export() {
         local _attachment_target_path="${_attachments_path}/${_attachment_name}"
 
         local _attachment_path
-        local _attachment_path="$(
+        _attachment_path="$(
           find "${_macos_attachments_path}" -name "${_attachment_name}" \
             | head -n 1
         )"
