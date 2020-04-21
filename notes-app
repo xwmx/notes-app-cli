@@ -1218,7 +1218,6 @@ _edit() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
   local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
   local _id=
-  local _markdown=0
   local _open_in_app=0
   local _properties=
   local _script=
@@ -1310,8 +1309,6 @@ _edit() {
 
   if [[ "${_before}" != "${_after}" ]]
   then
-    local _html_body="${_body}"
-
     _body=
     _name=
 
