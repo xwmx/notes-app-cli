@@ -759,8 +759,7 @@ Notes.app CLI
 A command line interface for Notes.app on macOS.
 
 Usage:
-  ${_ME} add --body <body> --name <name> [--account <account>]
-                [--folder <folder>]
+  ${_ME} add [<name>] [--account <account>] [--body <body>] [--folder <folder>]
   ${_ME} commands
   ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <note> [--account <account>] [--folder <folder>]
@@ -810,11 +809,11 @@ _alias_subcommand "help" "h"
 
 desc "add" <<HEREDOC
 Usage:
-  ${_ME} add --body <body> --name <name> [--account <account>]
-                [--folder <folder>]
+  ${_ME} add [<name>] [--account <account>] [--body <body>] [--folder <folder>]
 
 Options:
   --account <account>  The account containing the new note.
+  --body    <body>     Plain text or HTML body content.
   --folder  <folder>   The folder containing the new note.
 
 Identifiers:
@@ -824,7 +823,23 @@ Identifiers:
     number  The current sequence number.
 
 Description:
-  Add a new note.
+  Add a new note. When no arguments are specified, a new blank note file is
+  opened in the terminal editor, as set in the \`\$EDITOR\` environment
+  variable.
+
+  When <name> is specified, the editor is not opened and a new note is created
+  containing the specified <name> as the first line of the note.
+
+Note Format:
+  The format of each note provided by Notes.app consists of:
+
+    Line  1:     An unformatted string representing the "Name" property.
+    Lines 2-end: An HTML formatted body.
+
+  Within Notes.app the first line can be formatted, but this formatting is not
+  preserved when the note is retrieved or set via AppleScript, so any
+  formatting in this line will likely be lost or inconsistent with what's
+  displayed in Notes.app.
 HEREDOC
 _add() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
@@ -870,18 +885,11 @@ _add() {
           return 1
         fi
         ;;
-      --name)
-        if __option_value_is_present "${_val:-}"
-        then
-          _name="${_val}"
-          shift
-        else
-          _help "add"
-          return 1
-        fi
-        ;;
       *)
-        :
+        if [[ -z "${_name}" ]]
+        then
+          _name="${_arg}"
+        fi
         ;;
     esac
 
@@ -904,7 +912,36 @@ _add() {
     _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
-  if [[ -n "${_body:-}" ]] && [[ -n "${_name:-}" ]]
+  if [[ -z "${_name}" ]]
+  then
+    local _temp_file
+    _temp_file="$(mktemp)"
+
+    if [[ -n "${_name}" ]]
+    then
+      printf "%s\\n" "${_name}" >> "${_temp_file}"
+    fi
+
+    _edit_file "${_temp_file}"
+
+    _body=
+    _name=
+
+    while IFS= read -r __line
+    do
+      if [[ -z "${_name:-}" ]]
+      then
+        _name="${__line}"
+      else
+        _body+="${__line}${_NEWLINE}"
+      fi
+    done < "${_temp_file}"
+  fi
+
+  if [[ -z "${_body:-}" ]] && [[ -z "${_name:-}" ]]
+  then
+    return 1
+  elif [[ -n "${_body:-}" ]] && [[ -n "${_name:-}" ]]
   then
     _properties="{name:\"${_name}\", body:\"${_body}\"}"
   elif [[ -n "${_body:-}" ]]
@@ -1165,9 +1202,12 @@ Description:
   Edit a note idenitied by <id>, <name>, or <number> in your terminal editor,
   as set in the \`\$EDITOR\` environment variable.
 
-  The format provided by Notes.app consists of:
+Note Format:
+  The format of each note provided by Notes.app consists of:
+
     Line  1:     An unformatted string representing the "Name" property.
     Lines 2-end: An HTML formatted body.
+
   Within Notes.app the first line can be formatted, but this formatting is not
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
