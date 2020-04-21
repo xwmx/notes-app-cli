@@ -1407,7 +1407,7 @@ Note Format:
 HEREDOC
 _edit() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
-  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _folder_name=
   local _id=
   local _open_in_app=0
   local _properties=
