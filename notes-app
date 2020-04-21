@@ -2270,7 +2270,7 @@ HEREDOC
 _update() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
   local _body=
-  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _folder_name=
   local _id=
   local _name=
 
@@ -2291,7 +2291,7 @@ _update() {
         fi
         ;;
       --body)
-        if __option_value_is_present "${_val:-}"
+        if [[ -n "${_val:-}" ]]
         then
           _body="${_val}"
           shift
@@ -2311,7 +2311,7 @@ _update() {
         fi
         ;;
       --name)
-        if __option_value_is_present "${_val:-}"
+        if [[ -n "${_val:-}" ]]
         then
           _name="${_val}"
           shift
@@ -2347,11 +2347,8 @@ _update() {
     _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -n "${_folder_name:-}" ]]
   then
-    _help "update"
-    return 1
-  else
     _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
@@ -2365,12 +2362,34 @@ _update() {
   local _script_name=
   local _script_footer=
 
-  read -r -d '' _script_header <<HEREDOC || true
+  if [[ -n "${_folder_name:-}" ]]
+  then
+    read -r -d '' _script_header <<HEREDOC || true
 tell application "Notes"
   tell account ${_account_name}
     tell folder ${_folder_name}
       tell note ${_id}
 HEREDOC
+    read -r -d '' _script_footer <<HEREDOC || true
+      end tell
+    end tell
+  end tell
+end tell
+HEREDOC
+  else
+    read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  tell account ${_account_name}
+    tell note ${_id}
+HEREDOC
+    read -r -d '' _script_footer <<HEREDOC || true
+    end tell
+  end tell
+end tell
+HEREDOC
+  fi
+
+
   if [[ -n "${_body:-}" ]]
   then
     _script_body="set the body of it to \"${_body}\""
@@ -2380,12 +2399,7 @@ HEREDOC
   then
     _script_name="set the name of it to \"${_name}\""
   fi
-  read -r -d '' _script_footer <<HEREDOC || true
-      end tell
-    end tell
-  end tell
-end tell
-HEREDOC
+
 
 local _script="\
 ${_script_header}
