@@ -41,6 +41,8 @@ A command line interface for Notes.app on macOS.
 Usage:
   notes-app accounts [show <account>] [--properties <prop1>,<prop2>]
   notes-app add [<name>] [--account <account>] [--body <body>] [--folder <folder>]
+  notes-app attachments <note> [--account <account>] [--folder <folder>]
+                        [--properties <prop1>,<prop2>]
   notes-app commands
   notes-app count [--account <account>] [--folder <folder>]
   notes-app delete <note> [--account <account>] [--folder <folder>]
@@ -130,6 +132,37 @@ Note Format:
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
   displayed in Notes.app.
+```
+
+#### `attachments`
+
+```text
+Usage:
+  notes-app attachments <note> [--account <account>] [--folder <folder>]
+                        [--properties <prop1>,<prop2>]
+
+Options:
+  --account    <account>        The account containing the note.
+  --folder     <folder>         The folder containing the note.
+  --properties <prop1>,<prop2>  A comma-separated list of property names to
+                                include in the output. Set to 'all' to include
+                                all properties.
+
+Identifiers:
+  <note>, <account>, and <folder> can be identified with one of the following:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
+Available Properties:
+  all
+  id
+  name
+  container
+  contentIdentifier
+
+Description:
+  List attachments of <note> idenitied by <id>, <name>, or <number>.
 ```
 
 #### `count`

@@ -761,6 +761,8 @@ A command line interface for Notes.app on macOS.
 Usage:
   ${_ME} accounts [show <account>] [--properties <prop1>,<prop2>]
   ${_ME} add [<name>] [--account <account>] [--body <body>] [--folder <folder>]
+  ${_ME} attachments <note> [--account <account>] [--folder <folder>]
+                        [--properties <prop1>,<prop2>]
   ${_ME} commands
   ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <note> [--account <account>] [--folder <folder>]
