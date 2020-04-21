@@ -1,4 +1,4 @@
-# `notes-app` • Notes.app CLI
+# `notes-app` - A Notes.app CLI
 
 A command line interface for Notes.app on macOS. Add and edit notes in a
 text editor with command line support like Vim, Emacs, VS Code, Sublime
