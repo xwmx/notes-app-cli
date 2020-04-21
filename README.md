@@ -1,6 +1,9 @@
 # `notes-app` • Notes.app CLI
 
-A command line interface for Notes.app on macOS.
+A command line interface for Notes.app on macOS. Add and edit notes in a
+text editor with command line support like Vim, Emacs, VS Code, Sublime
+Text, etc. Create, list, view, update, and delete notes through simple
+terminal commands.
 
 ## Quirks
 
@@ -36,11 +39,11 @@ Notes.app CLI
 A command line interface for Notes.app on macOS.
 
 Usage:
-  notes-app add --body <body> --name <name> [--account <account>]
-                [--folder <folder>]
+  notes-app add [<name>] [--account <account>] [--body <body>] [--folder <folder>]
   notes-app commands
   notes-app count [--account <account>] [--folder <folder>]
   notes-app delete <note> [--account <account>] [--folder <folder>]
+  notes-app edit <note> [--account <account>] [--folder <folder>]
   notes-app folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
   notes-app list [--account <account>] [--folder <folder>]
@@ -65,11 +68,11 @@ More Information:
 
 ```text
 Usage:
-  notes-app add --body <body> --name <name> [--account <account>]
-                [--folder <folder>]
+  notes-app add [<name>] [--account <account>] [--body <body>] [--folder <folder>]
 
 Options:
   --account <account>  The account containing the new note.
+  --body    <body>     Plain text or HTML body content.
   --folder  <folder>   The folder containing the new note.
 
 Identifiers:
@@ -79,7 +82,23 @@ Identifiers:
     number  The current sequence number.
 
 Description:
-  Add a new note
+  Add a new note. When no arguments are specified, a new blank note file is
+  opened in the terminal editor, as set in the `$EDITOR` environment
+  variable.
+
+  When <name> is specified, the editor is not opened and a new note is created
+  containing the specified <name> as the first line of the note.
+
+Note Format:
+  The format of each note provided by Notes.app consists of:
+
+    Line  1:     An unformatted string representing the "Name" property.
+    Lines 2-end: An HTML formatted body.
+
+  Within Notes.app the first line can be formatted, but this formatting is not
+  preserved when the note is retrieved or set via AppleScript, so any
+  formatting in this line will likely be lost or inconsistent with what's
+  displayed in Notes.app.
 ```
 
 #### `count`
@@ -133,9 +152,12 @@ Description:
   Edit a note idenitied by <id>, <name>, or <number> in your terminal editor,
   as set in the `$EDITOR` environment variable.
 
-  The format provided by Notes.app consists of:
+Note Format:
+  The format of each note provided by Notes.app consists of:
+
     Line  1:     An unformatted string representing the "Name" property.
     Lines 2-end: An HTML formatted body.
+
   Within Notes.app the first line can be formatted, but this formatting is not
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's

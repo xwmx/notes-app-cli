@@ -763,6 +763,7 @@ Usage:
   ${_ME} commands
   ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <note> [--account <account>] [--folder <folder>]
+  ${_ME} edit <note> [--account <account>] [--folder <folder>]
   ${_ME} folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
   ${_ME} list [--account <account>] [--folder <folder>]
