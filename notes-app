@@ -806,6 +806,170 @@ _alias_subcommand "help" "h"
 # Subcommands
 ###############################################################################
 
+# accounts ####################################################################
+
+desc "accounts" <<HEREDOC
+Usage:
+  ${_ME} accounts [show <account>] [--properties <prop1>,<prop2>]
+
+Options:
+  --properties <prop1>,<prop2>  A comma-separated list of property names to
+                                include in the output. Set to 'all' to include
+                                all properties.
+
+Identifiers:
+  <account> can be identified with one of the following:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
+Available Properties:
+  all
+  id
+  name
+
+Subcommands:
+  (default)  List all accounts.
+  show       Show properties of <account>.
+
+Description:
+  List accounts or show an account.
+HEREDOC
+_accounts() {
+  local _id=
+  local _properties=
+  local _subcommand="list"
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --properties)
+        if [[ -n "${_val:-}" ]] && [[ ! "${_val:-}" =~ ^- ]]
+        then
+          _properties="$(printf "%s\\n" "${_val}" | tr ',' ' ')"
+        else
+          _help "accounts"
+          return 1
+        fi
+        shift
+        ;;
+      show)
+        if [[ "${_subcommand:-}" == "list" ]]
+        then
+          _subcommand="show"
+        fi
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  _debug printf "\${_properties}: %s\\n" "${_properties[*]:-}"
+  _debug printf "\${_subcommand}: %s\\n" "${_subcommand:-}"
+
+  local _script_footer=
+  local _script_header=
+  local -a _script_properties=()
+
+  if [[ "${_subcommand}" == "list" ]]
+  then
+    read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  set myAccounts to accounts
+  set myCounter to 0
+
+  repeat with theAccount in myAccounts
+    tell theAccount
+      set myCounter to myCounter + 1
+      -- log myCounter
+HEREDOC
+
+    read -r -d '' _script_footer <<HEREDOC || true
+    end tell
+  end repeat
+end tell
+HEREDOC
+
+  if [[ "${_properties}" =~ id|^all$ ]]
+  then
+    _script_properties+=("set accountId to get id")
+    _script_properties+=("log Id")
+  fi
+
+  if [[ "${_properties}" =~ name|^all$ ]]
+  then
+    _script_properties+=("set accountName to get name")
+    _script_properties+=("log accountName")
+  fi
+
+  if [[ -z "${_script_properties[*]:-}" ]]
+  then # no properties were specified
+    _script_properties+=("set accountName to get name")
+    _script_properties+=("log accountName")
+  fi
+
+  local _script="\
+${_script_header}
+${_script_properties[*]:-}
+${_script_footer}"
+
+  elif [[ "${_subcommand}" == "show" ]]
+  then
+    if [[ -z "${_id:-}" ]]
+    then
+      _help "show"
+      return 1
+    else
+      _id="$(_get_id_selector "${_id}")"
+    fi
+
+    if [[ -z "${_properties:-}" ]]
+    then # no properties were specified
+      _properties="all"
+    fi
+
+    read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  tell account ${_id}
+HEREDOC
+
+    read -r -d '' _script_footer <<HEREDOC || true
+  end tell
+end tell
+HEREDOC
+
+    if [[ "${_properties}" =~ id|^all$ ]]
+    then
+      _script_properties+=("set folderId to get id")
+      _script_properties+=("log folderId")
+    fi
+
+    if [[ "${_properties}" =~ name|^all$ ]]
+    then
+      _script_properties+=("set folderName to get name")
+      _script_properties+=("log folderName")
+    fi
+  fi
+
+  _script="\
+${_script_header}
+${_script_properties[*]:-}
+${_script_footer}"
+
+  _debug printf "\${_script}: %s\\n" "${_script}"
+
+  osascript -e "${_script}" 2>&1
+}
+
 # add #########################################################################
 
 desc "add" <<HEREDOC
@@ -1378,7 +1542,7 @@ Subcommands:
   show       Show properties of <folder>.
 
 Description:
-  List folders in an account.
+  List folders in an account or show a folder.
 HEREDOC
 _folders() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
@@ -2023,7 +2187,7 @@ Options:
   --name    <name>     The new value for the note name.
 
 Identifiers:
-  <notes>, <account>, and <folder> can be identified with one of the following:
+  <note>, <account>, and <folder> can be identified with one of the following:
     id      The Notes.app core data id (starts with 'x-coredata://').
     name    The name property.
     number  The current sequence number.
@@ -2301,6 +2465,7 @@ _ARGUMENTS=()
 #
 # All available subcommands.
 _SUBCOMMANDS=(
+  accounts
   add
   commands
   count
