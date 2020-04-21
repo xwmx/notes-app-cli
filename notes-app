@@ -1838,6 +1838,10 @@ _export() {
     _context_arguments+=("--folder" "${_folder_name}")
   fi
 
+  printf \
+    "Exporting %s items. This might take a while...\\n" \
+    "$(_count "${_context_arguments[@]:-}")"
+
   local _note_id_list=()
 
   if [[ -z "${_note_name:-}" ]]
