@@ -2,7 +2,7 @@
 
 A command line interface for Notes.app on macOS. Add and edit notes in a
 text editor with command line support like Vim, Emacs, VS Code, Sublime
-Text, etc. Create, list, view, update, and delete notes through simple
+Text, etc. Create, list, view, update, and delete notes using simple
 terminal commands.
 
 ## Quirks
