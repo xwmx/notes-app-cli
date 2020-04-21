@@ -1131,6 +1131,184 @@ HEREDOC
   osascript -e "${_script}" 2>&1
 }
 
+# attachments #################################################################
+
+desc "attachments" <<HEREDOC
+Usage:
+  ${_ME} attachments <note> [--account <account>] [--folder <folder>]
+                        [--properties <prop1>,<prop2>]
+
+Options:
+  --account    <account>        The account containing the note.
+  --folder     <folder>         The folder containing the note.
+  --properties <prop1>,<prop2>  A comma-separated list of property names to
+                                include in the output. Set to 'all' to include
+                                all properties.
+
+Identifiers:
+  <note>, <account>, and <folder> can be identified with one of the following:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
+Available Properties:
+  all
+  id
+  name
+  container
+  contentIdentifier
+
+Description:
+  List attachments of <note> idenitied by <id>, <name>, or <number>.
+HEREDOC
+_attachments() {
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _folder_name=
+  local _id=
+  local _properties=
+  local _script=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "attachments"
+          return 1
+        fi
+        ;;
+      --folder)
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "attachments"
+          return 1
+        fi
+        ;;
+      --properties)
+        if [[ -n "${_val:-}" ]] && [[ ! "${_val:-}" =~ ^- ]]
+        then
+          _properties="$(printf "%s\\n" "${_val}" | tr ',' ' ')"
+        else
+          _help "attachments"
+          return 1
+        fi
+        shift
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  _debug printf "\${_properties}: %s\\n" "${_properties[*]:-}"
+
+  if [[ -z "${_id:-}" ]]
+  then
+    _help "attachments"
+    return 1
+  else
+    _id="$(_get_id_selector "${_id}")"
+  fi
+
+  local _show_arguments=("${_id}")
+
+  if [[ -z "${_account_name:-}" ]]
+  then
+    _help "attachments"
+    return 1
+  else
+    _show_arguments+=("--account" "${_account_name}")
+    _account_name="$(_get_id_selector "${_account_name}")"
+  fi
+
+  if [[ -n "${_folder_name:-}" ]]
+  then
+    _show_arguments+=("--folder" "${_folder_name}")
+    _folder_name="$(_get_id_selector "${_folder_name}")"
+  fi
+
+  local _script_footer=
+  local _script_header=
+  local -a _script_properties=()
+
+  if [[ -z "${_properties:-}" ]]
+  then # no properties were specified
+    _properties="all"
+  fi
+
+  local _note_id=
+  _note_id="$(_show "${_show_arguments[@]}" --properties id)"
+  _note_id="$(_get_id_selector "${_note_id}")"
+
+    read -r -d '' _script_header <<HEREDOC || true
+tell application "Notes"
+  tell account ${_account_name}
+    tell note ${_id}
+      set myAttachments to get attachments
+      set myCounter to 0
+
+      repeat with theAttachment in myAttachments
+        tell theAttachment
+          set myCounter to myCounter + 1
+HEREDOC
+
+    read -r -d '' _script_footer <<HEREDOC || true
+        end tell
+      end repeat
+    end tell
+  end tell
+end tell
+HEREDOC
+
+  if [[ "${_properties}" =~ id|^all$ ]]
+  then
+    _script_properties+=("set attachmentId to get id")
+    _script_properties+=("log attachmentId")
+  fi
+
+  if [[ "${_properties}" =~ name|^all$ ]]
+  then
+    _script_properties+=("set attachmentName to get name")
+    _script_properties+=("log attachmentName")
+  fi
+
+  if [[ "${_properties}" =~ container|^all$ ]]
+  then
+    _script_properties+=("set attachmentContainer to get container")
+    _script_properties+=("log attachmentContainer")
+  fi
+
+  if [[ "${_properties}" =~ containerIdentifier|^all$ ]]
+  then
+    _script_properties+=("set attachmentContentIdentifier to get content identifier")
+    _script_properties+=("log attachmentContentIdentifier")
+  fi
+
+_script="\
+${_script_header}
+${_script_properties[*]:-}
+${_script_footer}"
+
+  _debug printf "\${_script}: %s\\n" "${_script}"
+
+  osascript -e "${_script}" 2>&1
+}
+
 # commands ####################################################################
 
 desc "commands" <<HEREDOC
@@ -1452,7 +1630,7 @@ _edit() {
 
   if [[ -z "${_id:-}" ]]
   then
-    _help "show"
+    _help "edit"
     return 1
   fi
 
@@ -1460,12 +1638,12 @@ _edit() {
 
   if [[ -n "${_account_name:-}" ]]
   then
-    _show_arguments+=("${_account_name}")
+    _show_arguments+=("--account" "${_account_name}")
   fi
 
   if [[ -n "${_folder_name:-}" ]]
   then
-    _show_arguments+=("${_folder_name}")
+    _show_arguments+=("--folder" "${_folder_name}")
   fi
 
   local _body=
@@ -1936,6 +2114,13 @@ tell application "Notes"
 HEREDOC
   fi
 
+  read -r -d '' _script_footer <<HEREDOC || true
+      end tell
+    end repeat
+  end tell
+end tell
+HEREDOC
+
   if [[ "${_properties}" =~ counter|^all$ ]]
   then
     _script_properties+=("log myCounter")
@@ -1988,13 +2173,6 @@ HEREDOC
     _script_properties+=("set noteName to get name")
     _script_properties+=("log noteName")
   fi
-
-  read -r -d '' _script_footer <<HEREDOC || true
-      end tell
-    end repeat
-  end tell
-end tell
-HEREDOC
 
 local _script="\
 ${_script_header}
@@ -2231,7 +2409,7 @@ ${_script_properties[*]:-}
 ${_script_footer}"
   fi
 
-  _debug printf "\${_script}: %s\\n" "${_script}"
+  printf "\${_script}: %s\\n" "${_script}"
 
   osascript -e "${_script}" 2>&1
 }
@@ -2544,6 +2722,7 @@ _ARGUMENTS=()
 _SUBCOMMANDS=(
   accounts
   add
+  attachments
   commands
   count
   delete
