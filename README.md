@@ -47,7 +47,8 @@ Usage:
   notes-app count [--account <account>] [--folder <folder>]
   notes-app delete <note> [--account <account>] [--folder <folder>]
   notes-app edit <note> [--account <account>] [--folder <folder>]
-  notes-app export <note> <path> [--account <account>] [--folder <folder>]
+  notes-app export <path> [--account <account>] [--folder <folder>]
+                   [--note <note>]
   notes-app folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
   notes-app list [--account <account>] [--folder <folder>]
@@ -233,11 +234,13 @@ Note Format:
 
 ```text
 Usage:
-  notes-app export <note> <path> [--account <account>] [--folder <folder>]
+  notes-app export <path> [--account <account>] [--folder <folder>]
+                   [--note <note>]
 
 Options:
   --account    <account>  The account containing the note.
   --folder     <folder>   The folder containing the note.
+  --note       <note>     A note to export.
 
 Identifiers:
   <note>, <account>, and <folder> can be identified with one of the following:
@@ -246,7 +249,13 @@ Identifiers:
     number  The current sequence number.
 
 Description:
-  Export a <note> and save in directory at <path>.
+  Export notes and save in directory at <path>. By default, all notes in the
+  default account (iCloud) are exported. Use --account,
+  --folder, and --note flags to reduce the scope.
+
+Limitations:
+  - Attachments are not supported.
+  - Some formatting is lost.
 ```
 
 #### `folders`

@@ -767,7 +767,8 @@ Usage:
   ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <note> [--account <account>] [--folder <folder>]
   ${_ME} edit <note> [--account <account>] [--folder <folder>]
-  ${_ME} export <note> <path> [--account <account>] [--folder <folder>]
+  ${_ME} export <path> [--account <account>] [--folder <folder>]
+                   [--note <note>]
   ${_ME} folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
   ${_ME} list [--account <account>] [--folder <folder>]
@@ -1722,11 +1723,13 @@ _env() {
 
 desc "export" <<HEREDOC
 Usage:
-  ${_ME} export <note> <path> [--account <account>] [--folder <folder>]
+  ${_ME} export <path> [--account <account>] [--folder <folder>]
+                   [--note <note>]
 
 Options:
   --account    <account>  The account containing the note.
   --folder     <folder>   The folder containing the note.
+  --note       <note>     A note to export.
 
 Identifiers:
   <note>, <account>, and <folder> can be identified with one of the following:
@@ -1735,10 +1738,16 @@ Identifiers:
     number  The current sequence number.
 
 Description:
-  Export a <note> and save in directory at <path>.
+  Export notes and save in directory at <path>. By default, all notes in the
+  default account ($_MY_DEFAULT_ACCOUNT_NAME) are exported. Use --account,
+  --folder, and --note flags to reduce the scope.
+
+Limitations:
+  - Attachments are not supported.
+  - Some formatting is lost.
 HEREDOC
 _export() {
-  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _account_name=
   local _include_attachments=0
   local _folder_name=
   local _id=
@@ -1776,11 +1785,18 @@ _export() {
           return 1
         fi
         ;;
-      *)
-        if [[ -z "${_id:-}" ]]
+      --note)
+        if __option_value_is_present "${_val:-}"
         then
-          _id="${_arg:-}"
-        elif [[ -z "${_target_path:-}" ]]
+          _note_name="${_val}"
+          shift
+        else
+          _help "edit"
+          return 1
+        fi
+        ;;
+      *)
+        if [[ -z "${_target_path:-}" ]]
         then
           _target_path="${_arg:-}"
         fi
@@ -1789,12 +1805,6 @@ _export() {
 
     shift
   done
-
-  if [[ -z "${_id:-}" ]]
-  then
-    _help "edit"
-    return 1
-  fi
 
   if [[ -z "${_target_path:-}" ]]
   then
@@ -1828,65 +1838,76 @@ _export() {
     _context_arguments+=("--folder" "${_folder_name}")
   fi
 
-  local _body=
-  local _name=
-  local _note_id=
+  local _note_id_list=()
 
-  while read -r __line
-  do
-    if [[ -z "${_note_id:-}" ]]
-    then
-      _note_id="${__line}"
-    elif [[ -z "${_name:-}" ]]
-    then
-      _name="${__line}"
-    else
-      _body+="${__line}${_NEWLINE}"
-    fi
-  done < <(_show "${_context_arguments[@]}" --properties id,name,body)
-
-  local _note_id_truncated
-  _note_id_truncated="$(basename "${_note_id:-}")"
-
-  local _target_file_path="${_target_path}/${_note_id_truncated}.txt"
-
-  printf "%s\\n" "${_name}" >> "${_target_file_path}"
-  printf "%s\\n" "${_body}"  >> "${_target_file_path}"
-
-  if ((_include_attachments))
+  if [[ -z "${_note_name:-}" ]]
   then
-    local _attachments_path="${_target_path}/${_note_id_truncated}"
-    if [[ ! -e "${_attachments_path}" ]]
-    then
-      mkdir "${_attachments_path}"
-    elif [[ ! -d "${_attachments_path}" ]]
-    then
-      printf "File exists at %s\\n" "${_attachments_path}"
-      return 1
-    fi
+    _note_id_list=($(_list "${_context_arguments[@]:-}" --properties id))
+  else
+    _note_id_list=($(_show "${_note_name}" "${_context_arguments[@]:-}" --properties id))
+  fi
 
-    local _account_name_selector=
-    _account_name_selector="$(_get_id_selector "${_account_name:-}")"
+  for __note_id in "${_note_id_list[@]}"
+  do
+    local _body=
+    local _name=
+    local _note_id=
 
-    local _note_id_selector=
-    _note_id_selector="$(_get_id_selector "${_note_id}")"
-
-    local -a _attachment_ids_and_names=
-    _attachment_ids_and_names=($(_attachments "${_note_id}" --properties id,name))
-
-    local _counter=0
-    while [[ "${_counter}" -lt "${#_attachment_ids_and_names[@]:-}" ]]
+    while read -r __line
     do
-      local _attachment_id="${_attachment_ids_and_names[0]:-}"
-      local _attachment_name="${_attachment_ids_and_names[1]:-}"
+      if [[ -z "${_note_id:-}" ]]
+      then
+        _note_id="${__line}"
+      elif [[ -z "${_name:-}" ]]
+      then
+        _name="${__line}"
+      else
+        _body+="${__line}${_NEWLINE}"
+      fi
+    done < <(_show "${__note_id}" "${_context_arguments[@]}" --properties id,name,body)
 
-      local _attachment_id_selector=
-      _attachment_id_selector="$(_get_id_selector "${_attachment_id}")"
+    local _note_id_truncated
+    _note_id_truncated="$(basename "${_note_id:-}")"
 
-      local _target_path="${_attachments_path}/${_attachment_name}"
+    local _target_file_path="${_target_path}/${_note_id_truncated}.txt"
 
-      # TODO: Saving the attachment silently fails.
-      read -r -d '' _script <<HEREDOC || true
+    printf "%s\\n" "${_name}" >> "${_target_file_path}"
+    printf "%s\\n" "${_body}"  >> "${_target_file_path}"
+
+    if ((_include_attachments))
+    then
+      local _attachments_path="${_target_path}/${_note_id_truncated}"
+      if [[ ! -e "${_attachments_path}" ]]
+      then
+        mkdir "${_attachments_path}"
+      elif [[ ! -d "${_attachments_path}" ]]
+      then
+        printf "File exists at %s\\n" "${_attachments_path}"
+        return 1
+      fi
+
+      local _account_name_selector=
+      _account_name_selector="$(_get_id_selector "${_account_name:-}")"
+
+      local _note_id_selector=
+      _note_id_selector="$(_get_id_selector "${_note_id}")"
+
+      local -a _attachment_ids_and_names=
+      _attachment_ids_and_names=($(_attachments "${_note_id}" --properties id,name))
+
+      local _counter=0
+      while [[ "${_counter}" -lt "${#_attachment_ids_and_names[@]:-}" ]]
+      do
+        local _attachment_id="${_attachment_ids_and_names[0]:-}"
+        local _attachment_name="${_attachment_ids_and_names[1]:-}"
+
+        local _attachment_id_selector=
+        _attachment_id_selector="$(_get_id_selector "${_attachment_id}")"
+
+        local _target_path="${_attachments_path}/${_attachment_name}"
+
+        # TODO: Saving the attachment silently fails.
+        read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
   tell account ${_account_name_selector}
     tell folder "Notes"
@@ -1900,15 +1921,17 @@ tell application "Notes"
 end tell
 HEREDOC
 
-      _debug printf "\${_script}: %s\\n" "${_script}"
+        _debug printf "\${_script}: %s\\n" "${_script}"
 
-      osascript -e "${_script}" 2>&1
+        osascript -e "${_script}" 2>&1
 
-      _counter=$((_counter+2))
-    done
-  fi
+        _counter=$((_counter+2))
+      done
+    fi
 
-  printf "Exported to %s\\n" "${_target_file_path}"
+    printf "Exported to %s\\n" "${_target_file_path}"
+  done
+
 
   _debug printf "%s\\n" "${_note_id_truncated}"
   _debug printf "%s\\n" "${_name}"
