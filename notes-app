@@ -1228,20 +1228,20 @@ _attachments() {
     _id="$(_get_id_selector "${_id}")"
   fi
 
-  local _show_arguments=("${_id}")
+  local _context_arguments=("${_id}")
 
   if [[ -z "${_account_name:-}" ]]
   then
     _help "attachments"
     return 1
   else
-    _show_arguments+=("--account" "${_account_name}")
+    _context_arguments+=("--account" "${_account_name}")
     _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
   if [[ -n "${_folder_name:-}" ]]
   then
-    _show_arguments+=("--folder" "${_folder_name}")
+    _context_arguments+=("--folder" "${_folder_name}")
     _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
@@ -1255,7 +1255,7 @@ _attachments() {
   fi
 
   local _note_id=
-  _note_id="$(_show "${_show_arguments[@]}" --properties id)"
+  _note_id="$(_show "${_context_arguments[@]}" --properties id)"
   _note_id="$(_get_id_selector "${_note_id}")"
 
     read -r -d '' _script_header <<HEREDOC || true
@@ -1637,16 +1637,16 @@ _edit() {
     return 1
   fi
 
-  local _show_arguments=("${_id}")
+  local _context_arguments=("${_id}")
 
   if [[ -n "${_account_name:-}" ]]
   then
-    _show_arguments+=("--account" "${_account_name}")
+    _context_arguments+=("--account" "${_account_name}")
   fi
 
   if [[ -n "${_folder_name:-}" ]]
   then
-    _show_arguments+=("--folder" "${_folder_name}")
+    _context_arguments+=("--folder" "${_folder_name}")
   fi
 
   local _body=
@@ -1667,7 +1667,7 @@ _edit() {
     else
       _body+="${__line}${_NEWLINE}"
     fi
-  done < <(_show "${_show_arguments[@]}" --properties id,name,body)
+  done < <(_show "${_context_arguments[@]}" --properties id,name,body)
 
   printf "%s\\n" "${_name}" >> "${_temp_file}"
   printf "%s\\n" "${_body}"  >> "${_temp_file}"
@@ -1816,16 +1816,16 @@ _export() {
     fi
   fi
 
-  local _show_arguments=("${_id}")
+  local _context_arguments=("${_id}")
 
   if [[ -n "${_account_name:-}" ]]
   then
-    _show_arguments+=("--account" "${_account_name}")
+    _context_arguments+=("--account" "${_account_name}")
   fi
 
   if [[ -n "${_folder_name:-}" ]]
   then
-    _show_arguments+=("--folder" "${_folder_name}")
+    _context_arguments+=("--folder" "${_folder_name}")
   fi
 
   local _body=
@@ -1843,7 +1843,7 @@ _export() {
     else
       _body+="${__line}${_NEWLINE}"
     fi
-  done < <(_show "${_show_arguments[@]}" --properties id,name,body)
+  done < <(_show "${_context_arguments[@]}" --properties id,name,body)
 
   local _note_id_truncated
   _note_id_truncated="$(basename "${_note_id:-}")"
