@@ -3,7 +3,7 @@
 load test_helper
 
 @test "\`add\` exits with 0 and adds note." {
-  run "${_PROGRAM}" add --name "Example Name" --body "Example body."
+  run "${_PROGRAM}" add "Example Name" --body "Example body."
   printf "\${lines[*]}: %s\\n" "${lines[*]}"
   printf "\${#lines[@]}: %s\\n" "${#lines[@]}"
 
