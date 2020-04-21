@@ -47,6 +47,7 @@ Usage:
   notes-app count [--account <account>] [--folder <folder>]
   notes-app delete <note> [--account <account>] [--folder <folder>]
   notes-app edit <note> [--account <account>] [--folder <folder>]
+  notes-app export <note> <path> [--account <account>] [--folder <folder>]
   notes-app folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
   notes-app list [--account <account>] [--folder <folder>]
@@ -226,6 +227,26 @@ Note Format:
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
   displayed in Notes.app.
+```
+
+#### `export`
+
+```text
+Usage:
+  notes-app export <note> <path> [--account <account>] [--folder <folder>]
+
+Options:
+  --account    <account>  The account containing the note.
+  --folder     <folder>   The folder containing the note.
+
+Identifiers:
+  <note>, <account>, and <folder> can be identified with one of the following:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
+Description:
+  Export a <note> and save in directory at <path>.
 ```
 
 #### `folders`
