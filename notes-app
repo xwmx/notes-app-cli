@@ -1905,15 +1905,6 @@ _list() {
     _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
-  local _note_container=
-
-  if [[ -n "${_folder_name:-}" ]]
-  then
-    _note_container="${_folder_name}"
-  else
-    _note_container="${_account_name}"
-  fi
-
   local _script_footer=
   local _script_header=
   local -a _script_properties=()
