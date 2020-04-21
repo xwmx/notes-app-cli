@@ -1721,8 +1721,7 @@ _env() {
 
 desc "export" <<HEREDOC
 Usage:
-  ${_ME} export <note> <path> [--account <account>] [--attachments]
-                   [--folder <folder>]
+  ${_ME} export <note> <path> [--account <account>] [--folder <folder>]
 
 Options:
   --account    <account>  The account containing the note.
@@ -1855,7 +1854,57 @@ _export() {
 
   if ((_include_attachments))
   then
-    :
+    local _attachments_path="${_target_path}/${_note_id_truncated}"
+    if [[ ! -e "${_attachments_path}" ]]
+    then
+      mkdir "${_attachments_path}"
+    elif [[ ! -d "${_attachments_path}" ]]
+    then
+      printf "File exists at %s\\n" "${_attachments_path}"
+      return 1
+    fi
+
+    local _account_name_selector=
+    _account_name_selector="$(_get_id_selector "${_account_name:-}")"
+
+    local _note_id_selector=
+    _note_id_selector="$(_get_id_selector "${_note_id}")"
+
+    local -a _attachment_ids_and_names=
+    _attachment_ids_and_names=($(_attachments "${_note_id}" --properties id,name))
+
+    local _counter=0
+    while [[ "${_counter}" -lt "${#_attachment_ids_and_names[@]:-}" ]]
+    do
+      local _attachment_id="${_attachment_ids_and_names[0]:-}"
+      local _attachment_name="${_attachment_ids_and_names[1]:-}"
+
+      local _attachment_id_selector=
+      _attachment_id_selector="$(_get_id_selector "${_attachment_id}")"
+
+      local _target_path="${_attachments_path}/${_attachment_name}"
+
+      # TODO: Saving the attachment silently fails.
+      read -r -d '' _script <<HEREDOC || true
+tell application "Notes"
+  tell account ${_account_name_selector}
+    tell folder "Notes"
+      tell note ${_note_id_selector}
+        set myAttachment to attachment ${_attachment_id_selector}
+        set targetPath to POSIX file "${_target_path}"
+        save myAttachment in targetPath
+      end tell
+    end tell
+  end tell
+end tell
+HEREDOC
+
+      _debug printf "\${_script}: %s\\n" "${_script}"
+
+      osascript -e "${_script}" 2>&1
+
+      _counter=$((_counter+2))
+    done
   fi
 
   printf "Exported to %s\\n" "${_target_file_path}"
