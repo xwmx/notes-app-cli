@@ -1721,7 +1721,8 @@ _env() {
 
 desc "export" <<HEREDOC
 Usage:
-  ${_ME} export <note> <path> [--account <account>] [--folder <folder>]
+  ${_ME} export <note> <path> [--account <account>] [--attachments]
+                   [--folder <folder>]
 
 Options:
   --account    <account>  The account containing the note.
@@ -1738,6 +1739,7 @@ Description:
 HEREDOC
 _export() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _include_attachments=0
   local _folder_name=
   local _id=
   local _open_in_app=0
@@ -1760,6 +1762,9 @@ _export() {
           _help "edit"
           return 1
         fi
+        ;;
+      --attachments)
+        _include_attachments=1
         ;;
       --folder)
         if __option_value_is_present "${_val:-}"
@@ -1843,11 +1848,15 @@ _export() {
   local _note_id_truncated
   _note_id_truncated="$(basename "${_note_id:-}")"
 
-
   local _target_file_path="${_target_path}/${_note_id_truncated}.txt"
 
   printf "%s\\n" "${_name}" >> "${_target_file_path}"
   printf "%s\\n" "${_body}"  >> "${_target_file_path}"
+
+  if ((_include_attachments))
+  then
+    :
+  fi
 
   printf "Exported to %s\\n" "${_target_file_path}"
 
