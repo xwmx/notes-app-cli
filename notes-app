@@ -1928,8 +1928,8 @@ _export() {
             printf "Exported attachment to %s\\n" "${_attachment_target_path}"
         fi
 
-        # TODO: Saving the attachment silently fails. This appears to be
-        # related to iCloud. More info:
+        # TODO: Saving the attachment via AppleScript silently fails. This
+        # appears to be related to iCloud. More info:
         # https://forum.latenightsw.com/t/exporting-apple-notes-attachments/766/5
 #         read -r -d '' _script <<HEREDOC || true
 # tell application "Notes"
