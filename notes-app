@@ -1717,6 +1717,144 @@ _env() {
   printf "_MY_RC_PATH=%s\\n" "${_MY_RC_PATH}"
 }
 
+# export ######################################################################
+
+desc "export" <<HEREDOC
+Usage:
+  ${_ME} export <note> <path> [--account <account>] [--folder <folder>]
+
+Options:
+  --account    <account>  The account containing the note.
+  --folder     <folder>   The folder containing the note.
+
+Identifiers:
+  <note>, <account>, and <folder> can be identified with one of the following:
+    id      The Notes.app core data id (starts with 'x-coredata://').
+    name    The name property.
+    number  The current sequence number.
+
+Description:
+  Export a <note> and save in directory at <path>.
+HEREDOC
+_export() {
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _folder_name=
+  local _id=
+  local _open_in_app=0
+  local _properties=
+  local _script=
+  local _target_path=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "edit"
+          return 1
+        fi
+        ;;
+      --folder)
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "edit"
+          return 1
+        fi
+        ;;
+      *)
+        if [[ -z "${_id:-}" ]]
+        then
+          _id="${_arg:-}"
+        elif [[ -z "${_target_path:-}" ]]
+        then
+          _target_path="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  if [[ -z "${_id:-}" ]]
+  then
+    _help "edit"
+    return 1
+  fi
+
+  if [[ -z "${_target_path:-}" ]]
+  then
+    _help "edit"
+    return 1
+  else
+    if [[ "${_target_path}" == "." ]]
+    then
+      _target_path="$(pwd)"
+    elif [[ "${_target_path}" == ".." ]]
+    then
+      _target_path="$(cd ..; pwd)"
+    fi
+
+    if [[ ! -e "${_target_path}" ]] || [[ ! -d "${_target_path}" ]]
+    then
+      printf "No directory found at '%s'\\n" "${_target_path}"
+      return 1
+    fi
+  fi
+
+  local _show_arguments=("${_id}")
+
+  if [[ -n "${_account_name:-}" ]]
+  then
+    _show_arguments+=("--account" "${_account_name}")
+  fi
+
+  if [[ -n "${_folder_name:-}" ]]
+  then
+    _show_arguments+=("--folder" "${_folder_name}")
+  fi
+
+  local _body=
+  local _name=
+  local _note_id=
+
+  while read -r __line
+  do
+    if [[ -z "${_note_id:-}" ]]
+    then
+      _note_id="${__line}"
+    elif [[ -z "${_name:-}" ]]
+    then
+      _name="${__line}"
+    else
+      _body+="${__line}${_NEWLINE}"
+    fi
+  done < <(_show "${_show_arguments[@]}" --properties id,name,body)
+
+  local _note_id_truncated
+  _note_id_truncated="$(basename "${_note_id:-}")"
+
+
+  local _target_file_path="${_target_path}/${_note_id_truncated}.txt"
+
+  printf "%s\\n" "${_name}" >> "${_target_file_path}"
+  printf "%s\\n" "${_body}"  >> "${_target_file_path}"
+
+  printf "Exported to %s\\n" "${_target_file_path}"
+
+  _debug printf "%s\\n" "${_note_id_truncated}"
+  _debug printf "%s\\n" "${_name}"
+  _debug printf "%s\\n" "${_body}"
+}
 
 # folders #####################################################################
 
@@ -2411,7 +2549,7 @@ ${_script_properties[*]:-}
 ${_script_footer}"
   fi
 
-  printf "\${_script}: %s\\n" "${_script}"
+  _debug printf "\${_script}: %s\\n" "${_script}"
 
   osascript -e "${_script}" 2>&1
 }
@@ -2730,6 +2868,7 @@ _SUBCOMMANDS=(
   delete
   edit
   env
+  export
   folders
   h
   help
