@@ -1155,7 +1155,7 @@ Description:
 HEREDOC
 _count() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
-  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _folder_name=
 
   while ((${#}))
   do
@@ -1205,16 +1205,16 @@ _count() {
     _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -n "${_folder_name:-}" ]]
   then
-    _help "count"
-    return 1
-  else
     _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
   local _script=
-  read -r -d '' _script <<HEREDOC || true
+
+  if [[ -n "${_folder_name:-}" ]]
+  then
+    read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
   tell account ${_account_name}
     set myFolder to folder ${_folder_name}
@@ -1222,6 +1222,14 @@ tell application "Notes"
   end tell
 end tell
 HEREDOC
+  else
+    read -r -d '' _script <<HEREDOC || true
+tell application "Notes"
+  set myAccount to account ${_account_name}
+  get the count of notes of myAccount
+end tell
+HEREDOC
+  fi
 
   osascript -e "${_script}" 2>&1
 }
