@@ -1255,7 +1255,7 @@ Description:
 HEREDOC
 _delete() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
-  local _folder_name="${_MY_DEFAULT_FOLDER_NAME:-}"
+  local _folder_name=
   local _force=0
   local _id=
   local _script=
@@ -1308,11 +1308,8 @@ _delete() {
     _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
-  if [[ -z "${_folder_name:-}" ]]
+  if [[ -n "${_folder_name:-}" ]]
   then
-    _help "delete"
-    return 1
-  else
     _folder_name="$(_get_id_selector "${_folder_name}")"
   fi
 
@@ -1326,7 +1323,17 @@ _delete() {
 
   if ! ((_force))
   then
-    printf "Deleting '%s' in folder '%s'\\n" "${_id}" "${_folder_name}"
+    if [[ -n "${_folder:-}" ]]
+    then
+      printf "Deleting '%s' in folder '%s' of account '%s'\\n" \
+        "${_id}" \
+        "${_folder_name}" \
+        "${_account_name}"
+    else
+      printf "Deleting '%s' in account '%s'\\n" \
+        "${_id}" \
+        "${_account_name}"
+    fi
     while true
     do
       read -r -p "Are you sure you want to proceed? [y/N] " __yn
@@ -1342,7 +1349,9 @@ _delete() {
     done
   fi
 
-  read -r -d '' _script <<HEREDOC || true
+  if [[ -n "${_folder:-}" ]]
+  then
+    read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
   tell account ${_account_name}
     tell folder ${_folder_name}
@@ -1351,6 +1360,15 @@ tell application "Notes"
   end tell
 end tell
 HEREDOC
+  else
+    read -r -d '' _script <<HEREDOC || true
+tell application "Notes"
+  tell account ${_account_name}
+    delete note ${_id}
+  end tell
+end tell
+HEREDOC
+  fi
 
   osascript -e "${_script}" 2>&1
 }
