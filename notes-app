@@ -1910,7 +1910,9 @@ _export() {
 
         local _target_path="${_attachments_path}/${_attachment_name}"
 
-        # TODO: Saving the attachment silently fails.
+        # TODO: Saving the attachment silently fails. This appears to be
+        # related to iCloud. More info:
+        # https://forum.latenightsw.com/t/exporting-apple-notes-attachments/766/5
         read -r -d '' _script <<HEREDOC || true
 tell application "Notes"
   tell account ${_account_name_selector}
