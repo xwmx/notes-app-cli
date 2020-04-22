@@ -538,6 +538,31 @@ _join() {
   printf "%s" "${@/#/${_delimiter}}" | tr -d '[:space:]'
 }
 
+# _note_has_attachments()
+#
+# Usage:
+#   _validate_no_attachments <note>
+#
+# Returns:
+#   0  If the <note> has attachments.
+#   1  If not.
+_note_has_attachments() {
+  local _note_name="${1:-}"
+
+  if [[ -z "${_note_name:-}" ]]
+  then
+    return 1
+  fi
+
+  local _note_attachments
+  _note_attachments="$(
+    _attachments "${_note_name}" --properties id
+  )"
+
+  [[ -n "${_note_attachments[*]:-}" ]]
+}
+
+
 # __option_value_is_present()
 #
 # Usage:
@@ -1666,6 +1691,12 @@ _edit() {
     fi
   done < <(_show "${_context_arguments[@]}" --properties id,name,body)
 
+  if _note_has_attachments "${_note_id}"
+  then
+    printf "Note has attachments and can not be edited safely.\\n"
+    return 1
+  fi
+
   printf "%s\\n" "${_name}" >> "${_temp_file}"
   printf "%s\\n" "${_body}"  >> "${_temp_file}"
 
@@ -2727,6 +2758,12 @@ _update() {
     return 1
   else
     _id="$(_get_id_selector "${_id}")"
+  fi
+
+  if _note_has_attachments "${_id}"
+  then
+    printf "Note has attachments and can not be edited safely.\\n"
+    return 1
   fi
 
   if [[ -z "${_account_name:-}" ]]
