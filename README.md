@@ -308,6 +308,7 @@ Examples:
   notes-app export ~/Documents/Example
 
   # Export all notes in the folder named "Example Folder"
+  notes-app export ~/Documents/Example --folder "Example Folder"
 ```
 
 #### `folders`
