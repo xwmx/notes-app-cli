@@ -792,8 +792,9 @@ Usage:
   ${_ME} count [--account <account>] [--folder <folder>]
   ${_ME} delete <note> [--account <account>] [--folder <folder>]
   ${_ME} edit <note> [--account <account>] [--folder <folder>]
-  ${_ME} export <path> [--account <account>] [--attachments]
-                   [--folder <folder>] [--note <note>]
+  ${_ME} export <path> [--account <account>] [--folder <folder>]
+                   [--note <note>]
+
   ${_ME} folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
   ${_ME} list [--account <account>] [--folder <folder>]
@@ -1750,7 +1751,8 @@ _env() {
 
 desc "export" <<HEREDOC
 Usage:
-  ${_ME} export <path> [--account <account>] [--folder <folder>] [--note <note>]
+  ${_ME} export <path> [--account <account>] [--folder <folder>]
+                   [--note <note>]
 
 Options:
   --account    <account>  The account containing the note.

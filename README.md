@@ -54,6 +54,7 @@ Usage:
   notes-app edit <note> [--account <account>] [--folder <folder>]
   notes-app export <path> [--account <account>] [--folder <folder>]
                    [--note <note>]
+
   notes-app folders [show <folder>] [--account <account>] [--folder <folder>]
                     [--properties <prop1>,<prop2>]
   notes-app list [--account <account>] [--folder <folder>]
@@ -131,10 +132,8 @@ Description:
 
 Note Format:
   The format of each note provided by Notes.app consists of:
-
     Line  1:     An unformatted string representing the "Name" property.
     Lines 2-end: An HTML formatted body.
-
   Within Notes.app the first line can be formatted, but this formatting is not
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
@@ -224,11 +223,10 @@ Description:
   as set in the `$EDITOR` environment variable.
 
 Note Format:
+Note Format:
   The format of each note provided by Notes.app consists of:
-
     Line  1:     An unformatted string representing the "Name" property.
     Lines 2-end: An HTML formatted body.
-
   Within Notes.app the first line can be formatted, but this formatting is not
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
@@ -258,9 +256,17 @@ Description:
   default account (iCloud) are exported. Use --account,
   --folder, and --note flags to reduce the scope.
 
-Limitations:
-  - Attachments are not supported.
-  - Some formatting is lost.
+  Attachments are not included in exports. Apple does not provide easy access
+  to attachments synced with iCloud.
+
+Note Format:
+  The format of each note provided by Notes.app consists of:
+    Line  1:     An unformatted string representing the "Name" property.
+    Lines 2-end: An HTML formatted body.
+  Within Notes.app the first line can be formatted, but this formatting is not
+  preserved when the note is retrieved or set via AppleScript, so any
+  formatting in this line will likely be lost or inconsistent with what's
+  displayed in Notes.app.
 ```
 
 #### `folders`
