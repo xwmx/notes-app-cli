@@ -865,6 +865,16 @@ Subcommands:
 
 Description:
   List accounts or show an account.
+
+Examples:
+  # List accounts by name.
+  ${_ME} accounts
+
+  # List accounts with ids and names.
+  ${_ME} accounts --properties id,name
+
+  # Print the id and name of the iCloud account.
+  ${_ME} accounts show "iCloud"
 HEREDOC
 _accounts() {
   local _id=
@@ -1034,6 +1044,16 @@ Note Format:
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
   displayed in Notes.app.
+
+Examples:
+  # Open a new note in the editor.
+  ${_ME} add
+
+  # Create a new note named "Example name." without opening editor.
+  ${_ME} add "Example name."
+
+ # Create a new note with a name and body without opening editor.
+  ${_ME} add "Example name." --body "Example body."
 HEREDOC
 _add() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
@@ -1188,6 +1208,13 @@ Available Properties:
 
 Description:
   List attachments of <note> idenitied by <id>, <name>, or <number>.
+
+Examples:
+  # List attachments of note number 1.
+  ${_ME} attachments 1
+
+  # List attachment ids of note number 1.
+  ${_ME} attachments 1 --properties id
 HEREDOC
 _attachments() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
@@ -1608,6 +1635,13 @@ Note Format:
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
   displayed in Notes.app.
+
+Examples:
+  # Open note number 1 in the editor.
+  ${_ME} edit 1
+
+  # Open note named "Todos" in the editor.
+  ${_ME} edit Todos
 HEREDOC
 _edit() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
@@ -1781,6 +1815,13 @@ Note Format:
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
   displayed in Notes.app.
+
+Examples:
+  # Export all notes in the defualt account.
+  ${_ME} export ~/Documents/Example
+
+  # Export all notes in the folder named "Example Folder"
+  ${_ME} export ~/Documents/Example --folder "Example Folder"
 HEREDOC
 _export() {
   local _account_name=
@@ -2003,6 +2044,16 @@ Subcommands:
 
 Description:
   List folders in an account or show a folder.
+
+Examples:
+  # List all folders in the current account.
+  ${_ME} folders
+
+  # List all ids of folders in the "Example" account.
+  ${_ME} folders --account Example --properties id
+
+  # Show folder number 1.
+  ${_ME} folders show 1
 HEREDOC
 _folders() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
@@ -2270,6 +2321,16 @@ Available Properties:
 
 Description:
   List notes.
+
+Examples:
+  # List all notes in the default account.
+  ${_ME} list
+
+  # List all notes in the account named "Example"
+  ${_ME} list --account Example
+
+  # List all ids of notes in the folder named "Sample"
+  ${_ME} list --folder Sample --properties id
 HEREDOC
 _list() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
@@ -2472,6 +2533,13 @@ Available Properties:
 
 Description:
   Show a note idenitied by <id>, <name>, or <number>.
+
+Examples:
+  # Print all properties for the note named "Shopping List"
+  ${_ME} show "Shopping List"
+
+  # Print the creationDate of note number 1.
+  ${_ME} show 1 --properties creationDate
 HEREDOC
 _show() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
@@ -2690,6 +2758,10 @@ Identifiers:
 
 Description:
   Update a note.
+
+Examples:
+  # Set the name of note number 1 to "Example Name".
+  ${_ME} update 1 --name "Example Name"
 HEREDOC
 _update() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"

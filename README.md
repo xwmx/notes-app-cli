@@ -103,6 +103,16 @@ Subcommands:
 
 Description:
   List accounts or show an account.
+
+Examples:
+  # list accounts by name
+  notes-app accounts
+
+  # list accounts with ids and names
+  notes-app accounts --properties id,name
+
+  # print the id and name of the iCloud account
+  notes-app accounts show "iCloud"
 ```
 
 #### `add`
@@ -138,6 +148,17 @@ Note Format:
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
   displayed in Notes.app.
+
+
+Examples:
+  # Open a new note in the editor.
+  notes-app add
+
+  # Create a new note named "Example name." without opening editor.
+  notes-app add "Example name."
+
+ # Create a new note with a name and body without opening editor.
+  notes-app add "Example name." --body "Example body."
 ```
 
 #### `attachments`
@@ -169,6 +190,13 @@ Available Properties:
 
 Description:
   List attachments of <note> idenitied by <id>, <name>, or <number>.
+
+Examples:
+  # List attachments of note number 1.
+  notes-app attachments 1
+
+  # List attachment ids of note number 1.
+  notes-app attachments 1 --properties id
 ```
 
 #### `count`
@@ -231,6 +259,13 @@ Note Format:
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
   displayed in Notes.app.
+
+Examples:
+  # Open note number 1 in the editor.
+  notes-app edit 1
+
+  # Open note named "Todos" in the editor.
+  notes-app edit Todos
 ```
 
 #### `export`
@@ -267,6 +302,12 @@ Note Format:
   preserved when the note is retrieved or set via AppleScript, so any
   formatting in this line will likely be lost or inconsistent with what's
   displayed in Notes.app.
+
+Examples:
+  # Export all notes in the defualt account.
+  notes-app export ~/Documents/Example
+
+  # Export all notes in the folder named "Example Folder"
 ```
 
 #### `folders`
@@ -301,6 +342,16 @@ Subcommands:
 
 Description:
   List folders in an account.
+
+Examples:
+  # List all folders in the current account.
+  notes-app folders
+
+  # List all ids of folders in the "Example" account.
+  notes-app folders --account Example --properties id
+
+  # Show folder number 1.
+  notes-app folders show 1
 ```
 
 #### `list`
@@ -336,6 +387,16 @@ Available Properties:
 
 Description:
   List notes
+
+Examples:
+  # List all notes in the default account.
+  notes-app list
+
+  # List all notes in the account named "Example"
+  notes-app list --account Example
+
+  # List all ids of notes in the folder named "Sample"
+  notes-app list --folder Sample --properties id
 ```
 
 #### `show`
@@ -371,6 +432,13 @@ Available Properties:
 
 Description:
   Show a note idenitied by <id>, <name>, or <number>.
+
+Examples:
+  # Print all properties for the note named "Shopping List"
+  notes-app show "Shopping List"
+
+  # Print the creationDate of note number 1.
+  notes-app show 1 --properties creationDate
 ```
 
 #### `update`
@@ -394,6 +462,10 @@ Identifiers:
 
 Description:
   Update a note.
+
+Examples:
+  # Set the name of note number 1 to "Example Name".
+  notes-app update 1 --name "Example Name"
 ```
 
 ## Tests
