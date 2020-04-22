@@ -35,10 +35,26 @@ formatting.
 
 ### Homebrew
 
-To install with [Homebrew](http://brew.sh/):
+Install with [Homebrew](http://brew.sh/):
 
 ```bash
 brew install xwmx/taps/notes-app
+```
+
+To install manually, simply download the `notes-app` script:
+
+```bash
+# download with curl
+curl -LO https://raw.github.com/xwmx/notes-app-cli/master/notes-app && chmod +x notes-app
+
+# download with wget
+wget https://raw.github.com/xwmx/notes-app-cli/master/notes-app && chmod +x notes-app
+```
+
+Then run `notes-app` with:
+
+```bash
+./notes-app
 ```
 
 ## Usage

@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-# date -j -f "%m/%d/%y %H:%M:%S %p" "8/22/15 8:15:00 am" +"%m%d%y"
-# date -j -f "%A, %B %d, %y at %H:%M:%S %p" "Tuesday, April 21, 2020 at 11:54:38 AM" +"%m%d%y"
-date -j -f "%A, %B %d, %y %H %M %S" "Tuesday, April 01, 2020 11:54:38" +"%m/%d/%y %H:%M:%S"
-# date -j -f "%A %B %d %y %H:%M:%S" "Tuesday April 01 2020 11:54:38" +"%A,%_d %B %Y %H:%M:%S"
-
-
-date -j -f  "04/21/2020 11:54:50"
