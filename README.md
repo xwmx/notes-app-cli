@@ -5,11 +5,16 @@ text editor with command line support like Vim, Emacs, VS Code, Sublime
 Text, etc. Create, list, view, update, and delete notes using simple
 terminal commands. Export your notes.
 
-## Quirks
+## Quirks and Limitations
 
 - Requires macOS.
 - Notes.app must be open. `notes-app` will open it in background if it's
     not already open.
+- Attachments are not supported. Apple doesn't provide easy access to
+    attachments syned with iCloud. Editing a note that contains
+    an attachment results in the attachment being removed. In order to
+    avoid data loss, `notes-app` does not allow editing or updating notes
+    that have attachments.
 - The formatting of the first line in a note is not preserved. Notes.app treats
     the first line of a note as the "name" of the note and does not allow
     formatting of this line through AppleScript, while the "body" of the note
