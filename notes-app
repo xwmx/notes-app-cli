@@ -1750,12 +1750,10 @@ _env() {
 
 desc "export" <<HEREDOC
 Usage:
-  ${_ME} export <path> [--account <account>] [--attachments]
-                   [--folder <folder>] [--note <note>]
+  ${_ME} export <path> [--account <account>] [--folder <folder>] [--note <note>]
 
 Options:
   --account    <account>  The account containing the note.
-  --attachments           Export attachments with notes.
   --folder     <folder>   The folder containing the note.
   --note       <note>     A note to export.
 
@@ -1769,6 +1767,9 @@ Description:
   Export notes and save in directory at <path>. By default, all notes in the
   default account ($_MY_DEFAULT_ACCOUNT_NAME) are exported. Use --account,
   --folder, and --note flags to reduce the scope.
+
+  Attachments are not included in exports. Apple does not provide easy access
+  to attachments synced with iCloud.
 
 Note Format:
   The format of each note provided by Notes.app consists of:
