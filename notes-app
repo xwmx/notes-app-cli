@@ -2753,11 +2753,12 @@ ${_script_footer}"
 
 desc "sync" <<HEREDOC
 Usage:
-  ${_ME} sync <path> [--account <account>] [--folder <folder>]
+  ${_ME} sync <folder> <path> [--account <account>] [--folder <folder>]
 HEREDOC
 _sync() {
   local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
   local _folder_name=
+  local _parent_folder_name=
   local _target_path=
 
   while ((${#}))
@@ -2779,7 +2780,7 @@ _sync() {
       --folder)
         if __option_value_is_present "${_val:-}"
         then
-          _folder_name="${_val}"
+          _parent_folder_name="${_val}"
           shift
         else
           _help "count"
@@ -2787,7 +2788,10 @@ _sync() {
         fi
         ;;
       *)
-        if [[ -z "${_target_path:-}" ]]
+        if [[ -z "${_folder_name:-}" ]]
+        then
+          _folder_name="${_arg:-}"
+        elif [[ -z "${_target_path:-}" ]]
         then
           _target_path="${_arg:-}"
         fi
@@ -2834,12 +2838,12 @@ _sync() {
     _account_name="$(_get_id_selector "${_account_name}")"
   fi
 
-  if [[ -n "${_folder_name:-}" ]]
+  if [[ -n "${_parent_folder_name:-}" ]]
   then
-    _folder_name="$(_get_id_selector "${_folder_name}")"
+    _parent_folder_name="$(_get_id_selector "${_parent_folder_name}")"
   fi
 
-  _export --folder "notes-app-cli" "${_target_path}"
+  _export --folder "${_folder_name}" "${_target_path}"
   # .last-sync-index
   # .index
 
