@@ -1955,8 +1955,20 @@ _export() {
 
     local _target_file_path="${_target_path}/${_note_id_truncated}.txt"
 
-    printf "%s\\n" "${_name}" >> "${_target_file_path}"
-    printf "%s\\n" "${_body}"  >> "${_target_file_path}"
+    local _temp_file
+    _temp_file="$(mktemp)"
+
+    printf "%s\\n" "${_name}" >> "${_temp_file}"
+    printf "%s\\n" "${_body}" >> "${_temp_file}"
+
+    if [[ -e "${_target_file_path}" ]] &&
+       [[ "$(_get_hash "${_temp_file}")" == "$(_get_hash "${_target_file_path}")" ]]
+    then
+      printf "File exists and is unchanged: %s\\n" "${_target_path}"
+      continue
+    else
+      cat "${_temp_file}" > "${_target_file_path}"
+    fi
 
     if ((_include_attachments))
     then
@@ -2737,6 +2749,102 @@ ${_script_footer}"
   osascript -e "${_script}" 2>&1
 }
 
+# sync ########################################################################
+
+desc "sync" <<HEREDOC
+Usage:
+  ${_ME} sync <path> [--account <account>] [--folder <folder>]
+HEREDOC
+_sync() {
+  local _account_name="${_MY_DEFAULT_ACCOUNT_NAME:-}"
+  local _folder_name=
+  local _target_path=
+
+  while ((${#}))
+  do
+    local _arg="${1:-}"
+    local _val="${2:-}"
+
+    case "${_arg}" in
+      --account)
+        if __option_value_is_present "${_val:-}"
+        then
+          _account_name="${_val}"
+          shift
+        else
+          _help "count"
+          return 1
+        fi
+        ;;
+      --folder)
+        if __option_value_is_present "${_val:-}"
+        then
+          _folder_name="${_val}"
+          shift
+        else
+          _help "count"
+          return 1
+        fi
+        ;;
+      *)
+        if [[ -z "${_target_path:-}" ]]
+        then
+          _target_path="${_arg:-}"
+        fi
+        ;;
+    esac
+
+    shift
+  done
+
+  if [[ -z "${_target_path:-}" ]]
+  then
+    _help "sync"
+    return 1
+  else
+    if [[ "${_target_path}" == "." ]]
+    then
+      _target_path="$(pwd)"
+    elif [[ "${_target_path}" == ".." ]]
+    then
+      _target_path="$(cd ..; pwd)"
+    fi
+
+    if [[ ! -e "${_target_path}" ]] || [[ ! -d "${_target_path}" ]]
+    then
+      printf "No directory found at '%s'\\n" "${_target_path}"
+      return 1
+    fi
+  fi
+
+  if [[ -n "${_account_name:-}" ]] &&
+     [[ -n "${_folder_name:-}"  ]] &&
+     ! _validate_account_contains_folder "${_account_name}" "${_folder_name}"
+  then
+    printf "Account '%s' does not contain folder '%s'.\\n" \
+      "${_account_name}" "${_folder_name}"
+    return 1
+  fi
+
+  if [[ -z "${_account_name:-}" ]]
+  then
+    _help "sync"
+    return 1
+  else
+    _account_name="$(_get_id_selector "${_account_name}")"
+  fi
+
+  if [[ -n "${_folder_name:-}" ]]
+  then
+    _folder_name="$(_get_id_selector "${_folder_name}")"
+  fi
+
+  _export --folder "notes-app-cli" "${_target_path}"
+  # .last-sync-index
+  # .index
+
+}
+
 # update ######################################################################
 
 desc "update" <<HEREDOC
@@ -3067,6 +3175,7 @@ _SUBCOMMANDS=(
   help
   list
   show
+  sync
   update
   version
 )
