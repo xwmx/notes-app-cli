@@ -41,6 +41,8 @@ Install with [Homebrew](http://brew.sh/):
 brew install xwmx/taps/notes-app
 ```
 
+### Manual
+
 To install manually, simply download the `notes-app` script:
 
 ```bash
