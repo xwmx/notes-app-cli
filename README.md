@@ -24,6 +24,12 @@ terminal commands. Export your notes to text files.
 - If a new note is created without a "name" specified, Notes.app sets the
     first line to "New Note".
 
+Overall warning: Notes.app data is not fully accessible so some things get
+lost in translation. `notes-app` makes an effort to provide access to the raw
+data from Notes.app and has a few checks to avoid data issues, but Notes.app
+still does processing on its end (e.g., adding HTML tags) so expect some
+weirdness when updating and editing existing notes with a lot of formatting.
+
 ## Installation
 
 ### Homebrew
