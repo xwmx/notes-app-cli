@@ -1,9 +1,14 @@
 # `notes-app` - A Notes.app CLI
 
-A command line interface for Notes.app on macOS. Add and edit notes in a
-text editor with command line support like Vim, Emacs, VS Code, Sublime
-Text, etc. Create, list, view, update, and delete notes using simple
-terminal commands. Export your notes to text files.
+A command line interface for Notes.app on macOS 10.14 Mojave and earlier.
+**AppleScript Notes.app access is apparently [broken in 10.15 Calatina](https://github.com/xwmx/notes-app-cli/issues/1).**
+
+Add and edit notes in a text editor with command line support like Vim, Emacs,
+VS Code, Sublime Text, etc. Create, list, view, update, and delete notes using
+simple terminal commands. Export your notes to text files.
+
+For a full featured, vendor independent, plain-text command line note-taking and bookmarking
+tool, check out **[`nb`](https://github.com/xwmx/nb)**.
 
 ## Quirks and Limitations
 
