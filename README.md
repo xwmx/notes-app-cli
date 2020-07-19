@@ -13,7 +13,7 @@ plain-text command line note-taking and bookmarking tool, check out
 
 ## Quirks and Limitations
 
-- Requires macOS.
+- Requires macOS 10.14 Mojave and earlier ([broken in 10.15 Calatina](https://github.com/xwmx/notes-app-cli/issues/1)).
 - Notes.app must be open. `notes-app` will open it in background if it's
     not already open.
 - Attachments are not supported. Apple doesn't provide easy access to
