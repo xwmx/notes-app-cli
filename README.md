@@ -276,7 +276,6 @@ Description:
   as set in the `$EDITOR` environment variable.
 
 Note Format:
-Note Format:
   The format of each note provided by Notes.app consists of:
     Line  1:     An unformatted string representing the "Name" property.
     Lines 2-end: An HTML formatted body.
