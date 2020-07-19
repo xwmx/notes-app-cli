@@ -7,8 +7,8 @@ Add and edit notes in a text editor with command line support like Vim, Emacs,
 VS Code, Sublime Text, etc. Create, list, view, update, and delete notes using
 simple terminal commands. Export your notes to text files.
 
-For a full featured, vendor independent, plain-text command line note-taking and bookmarking
-tool, check out **[`nb`](https://github.com/xwmx/nb)**.
+Alternatively, for a full featured, vendor independent, plain-text command line note-taking
+and bookmarking tool, check out **[`nb`](https://github.com/xwmx/nb)**.
 
 ## Quirks and Limitations
 
