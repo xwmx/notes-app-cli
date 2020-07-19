@@ -8,7 +8,7 @@ VS Code, Sublime Text, etc. Create, list, view, update, and delete notes using
 simple terminal commands. Export your notes to text files.
 
 Alternatively, if you are interested in a full-featured, vendor-independent,
-plain text command line note-taking and bookmarking tool, check out
+plain-text command line note-taking and bookmarking tool, check out
 **[`nb`](https://github.com/xwmx/nb)**.
 
 ## Quirks and Limitations
