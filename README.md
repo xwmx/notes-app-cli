@@ -40,7 +40,9 @@ formatting.
 Install with [Homebrew](http://brew.sh/):
 
 ```bash
-brew install xwmx/taps/notes-app
+brew tap xwmx/taps
+brew install notes-app
+
 ```
 
 ### Manual
