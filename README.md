@@ -1,7 +1,8 @@
 # `notes-app` - A Notes.app CLI
 
-A command line interface for Notes.app on macOS 10.14 Mojave and earlier.
-**Notes.app access is apparently [broken in 10.15 Calatina](https://github.com/xwmx/notes-app-cli/issues/1).**
+A command line interface for Notes.app on macOS.
+**Notes.app access is apparently [broken in 10.15 Calatina](https://github.com/xwmx/notes-app-cli/issues/1)**
+and other versions of macOS, but appears to be working again as of macOS 14 Sonoma.
 
 Add and edit notes in a text editor with command line support like Vim, Emacs,
 VS Code, Sublime Text, etc. Create, list, view, update, and delete notes using
@@ -9,7 +10,8 @@ simple terminal commands. Export your notes to text files.
 
 ## Quirks and Limitations
 
-- Requires macOS 10.14 Mojave and earlier ([broken in 10.15 Calatina](https://github.com/xwmx/notes-app-cli/issues/1)).
+- Requires macOS 10.14 Mojave and earlier ([broken in 10.15 Calatina](https://github.com/xwmx/notes-app-cli/issues/1)),
+  or macOS 14 Sonoma and higher.
 - Notes.app must be open. `notes-app` will open it in background if it's
     not already open.
 - Attachments are not supported. Apple doesn't provide easy access to
