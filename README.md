@@ -220,7 +220,7 @@ Available Properties:
   contentIdentifier
 
 Description:
-  List attachments of <note> idenitied by <id>, <name>, or <number>.
+  List attachments of <note> identified by <id>, <name>, or <number>.
 
 Examples:
   # List attachments of note number 1.
@@ -278,7 +278,7 @@ Identifiers:
     number  The current sequence number.
 
 Description:
-  Edit a note idenitied by <id>, <name>, or <number> in your terminal editor,
+  Edit a note identified by <id>, <name>, or <number> in your terminal editor,
   as set in the `$EDITOR` environment variable.
 
 Note Format:
@@ -462,7 +462,7 @@ Available Properties:
   body
 
 Description:
-  Show a note idenitied by <id>, <name>, or <number>.
+  Show a note identified by <id>, <name>, or <number>.
 
 Examples:
   # Print all properties for the note named "Shopping List"
